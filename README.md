@@ -1,11 +1,11 @@
 # ETC5521 Assignment 1 
 
-Team name: [FILL]
+Team name: [BROLGA]
 
 Team members:
 
-* [FILL]
-* [FILL]
+* [Dhruv Nirmal]
+* [Gui Gao]
 
 # Steps
 
