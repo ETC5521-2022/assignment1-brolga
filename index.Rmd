@@ -15,6 +15,21 @@ output:
 
 # Introduction and motivation
 
+## Introduction:
+
+The classic Board Games have been around for decades, bringing people together to enjoy the traditional game. In Greece there are many popular board game associations and 'fan clubs' which organise many tournaments and offer a wealth of prizes. 
+
+Today, although Computer Games are in a golden age of development with technological support, there are still many great board games that are released each year and attract a lot of attention.
+
+**Board Game Geek** is a specialist board game website. Users can find every board game and information about it. This information includes descriptions of the games, reviews, user ratings, professional ratings, prices, where to buy and more.
+
+
+## Motivation:
+
+My teammates and I are both interested in board games and have tried many interesting board games. This study and analysis of the huge dataset of board games can help us understand board games from a different perspective, and also help us understand the whole landscape of board games and how it has changed over time.
+
+So, we have tried to dig deeper into the data itself to show some reports and interesting data visualisations of the results.
+
 
 # Data description
 
