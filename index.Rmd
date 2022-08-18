@@ -36,7 +36,50 @@ So, we have tried to dig deeper into the data itself to show some reports and in
 
 # Questions of interest
 
-[FILL] What questions might be possible to answer with this data, aiming for about 20. Bold the 3-4 questions you will address in the analysis
+## Questions list
+
+* a.
+
+Q1.
+How board game ratings change by year of publication?
+
+Q2.
+Trends in game mechanics over time.
+
+Q3.
+Trends in board game publication rates over time.
+
+Q4.
+What are the common game mechanics and their changes in prevalent?
+
+Q5.
+What types of games are becoming increasingly popular?
+
+Q6.
+How many games have each listed how many mechanics?
+
+Q7.
+What is the distribution of ratings for the games?
+
+Q8.
+Is there a linear relationship between the year of release of a game and the average rating it receives?
+
+Q9.
+Are Board Game Descriptions more positive or negative?
+
+Q10.
+What are the 10 most common words used in board game descriptions?
+
+## Interested Questions
+
+* a.
+
+Q1.
+What are the common game mechanics and their changes in prevalent?
+
+Q2.
+What is the distribution of ratings for the games?
+
 
 # Expected findings
 
