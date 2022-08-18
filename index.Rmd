@@ -83,7 +83,13 @@ What is the distribution of ratings for the games?
 
 # Expected findings
 
-[FILL] For your chosen questions explain what you think you might find.
+* a.
+Q1.
+The most common game mechanics maybe the 'Acting', 'Dice Rolling' and 'Hand Management'. I guess the more common the game mechanics are, the more popular they will become.
+
+Q2.
+I guess the ratings for the games follow a normal distribution.
+
 
 # Analysis and findings
 
