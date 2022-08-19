@@ -12,6 +12,15 @@ output:
 
 [This assignment is for ETC5521 Assignment 1 by Team `r rmarkdown::metadata$team` comprising of `r knitr::combine_words(rmarkdown::metadata$author)`.]{style="color:#006DAE;"}
 
+```{r message=FALSE, echo=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(knitr)
+ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
+details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
+```
+
+
 
 # Introduction and motivation
 
@@ -33,12 +42,67 @@ So, we have tried to dig deeper into the data itself to show some reports and in
 
 # Data description
 
+a. **Source of the data**
+
+Our data comes from *Kaggle* by way of **Board Games Geek**, with a hattip to *David and Georgios*. 
+We could read the data in R via the following steps:
+
+* ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
+* details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
+
+
+b. **The structure of the data**
+
+We have two initial datasets, **ratings** and **details**. The initial size of the ratings dataset is around 4.8MB and contains 21631 observations and 10 columns. The original size of the details dataset is approximately 32.7MB, with 21831 observations and 23 columns.
+
+* About **ratings** dataset:
+[This dataset](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv) contains information about the average rating , rank and theoretical rating average (bayes average). Every game's url and thumbnail link is also provided. It was collected over a time period of 100 AD to 2022.
+
+```{r message=FALSE, echo=FALSE}
+tibble(
+  "variable" = colnames(ratings),
+  "class" = c("double", "double", "character", "double", "double", "double",
+              "double", "double", "character", "character"),
+  "description" = c("Game number", "Game ID", "Game name", "The year game was 
+                    released", "Game rank", "Average rating received by players",
+                    "Bayes average rating", "Number of users rated the game",
+                    "url of game", "link for thumbnail of game")
+) %>%
+  kable() %>%
+  kable_styling(full_width = F,
+                bootstrap_options = c("striped", "condensed", "bordered"))
+```
+
+* About **details** dataset observations:
+[The details](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv) dataset provides information about the type of board game, game mechanics, who was the artist, creator and publisher of the game. It provides an extensive detail about the game such as min and max player who can play the game, minimum age, how the game is played and also put each game in categories such as building, dice, drinking e.t.c. The data collected is over a time period of 400 
+AD to 2023.
+
+
+```{r message=FALSE, echo=FALSE}
+tibble(
+  "variables" = colnames(details),
+  "class" = c("double", "double", "character", "character", "double", "double",                   "double", "double", "double", "double", "double", "character",                      "character", "character", "character", "character", "character",                    "character", "character", "double", "double", "double", "double"),
+  "dsecription" = c("Game number", "Game ID", "Game name", "description of game",
+                    "year game was published", "minimum number of players", 
+                    "maximum number of players", "Playing time in minutes",
+                    "minimum playing time", "maximum playing time", 
+                    "minimum age to play the game", "Category", "Mechanic",
+                    "board game family", "add-on tools in game", "implementation",
+                    "designer of game", "Artist of game", "publisher of game",
+                    "number of people who own the game", 
+                    "number of people who trade the game", 
+                    "number of people who want the game", 
+                    "number of people who wish to get the game")
+) %>%
+  kable() %>%
+  kable_styling(full_width = F,
+                bootstrap_options = c("striped", "condensed", "bordered"))
+```
+
 
 # Questions of interest
 
 ## Questions list
-
-* a.
 
 Q1.
 How board game ratings change by year of publication?
@@ -50,7 +114,7 @@ Q3.
 Trends in board game publication rates over time.
 
 Q4.
-What are the common game mechanics and their changes in prevalent?
+**What are the common game mechanics and their changes in prevalent?**
 
 Q5.
 What types of games are becoming increasingly popular?
@@ -59,7 +123,7 @@ Q6.
 How many games have each listed how many mechanics?
 
 Q7.
-What is the distribution of ratings for the games?
+**What is the distribution of ratings for the games?**
 
 Q8.
 Is there a linear relationship between the year of release of a game and the average rating it receives?
@@ -70,9 +134,43 @@ Are Board Game Descriptions more positive or negative?
 Q10.
 What are the 10 most common words used in board game descriptions?
 
-## Interested Questions
+Q11. 
+**Is there any relationship between average game time and ownership, min/max 
+players?**
 
-* a.
+Q12. 
+How does number of people who wish to own the game and who own the game plot 
+against each other?  
+
+Q13. 
+How does Rank and average rating plot against each other. (Highly ranked games should have more rating)
+
+Q14. 
+Which age group prefers which type of game eg medical , building etc.? eg. 
+younger children might be interested in building games etc and teenagers might be 
+interested in games like Monopoly
+
+Q15. 
+Are people intrigued by a particular game designer?
+
+Q16. 
+**How did the era of electronic games(starting from 2010-11) affect the number of people who want/wish/own board games?** 
+
+Q17. 
+Is it right to assume that a game board publisher publishes a single type of 
+board game and do the game publishers only focus on a certain age group?
+
+Q18. 
+Are people intrigued by a particular game publisher?
+
+Q19. 
+How accurate has bayes average been?
+
+Q20. 
+Which era or decade played a big role in people playing more board games?
+
+
+## Interested Questions
 
 Q1.
 What are the common game mechanics and their changes in prevalent?
@@ -80,15 +178,29 @@ What are the common game mechanics and their changes in prevalent?
 Q2.
 What is the distribution of ratings for the games?
 
+Q3.
+Is there any relationship between average game time and ownership, min/max players. 
+
+
+Q4.
+How did the era of electronic games(starting from 2010-11) affect the number of people who want/wish/own board games? 
+
 
 # Expected findings
 
-* a.
 Q1.
 The most common game mechanics maybe the 'Acting', 'Dice Rolling' and 'Hand Management'. I guess the more common the game mechanics are, the more popular they will become.
 
 Q2.
 I guess the ratings for the games follow a normal distribution.
+
+Q3.
+More average play might mean less owners but might be popular among bigger groups 
+of people.
+
+Q4.
+The demand of board games should be lower after the start of electronic games 
+era.
 
 
 # Analysis and findings
