@@ -10,16 +10,28 @@ output:
   html_document
 ---
 
+
 [This assignment is for ETC5521 Assignment 1 by Team `r rmarkdown::metadata$team` comprising of `r knitr::combine_words(rmarkdown::metadata$author)`.]{style="color:#006DAE;"}
 
+
 ```{r message=FALSE, echo=FALSE}
+# library packages
 library(tidyverse)
 library(kableExtra)
 library(knitr)
+library(drlib)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+library(performance)
+```
+
+
+```{r message=FALSE, echo=FALSE}
+# read data
 ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
 details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
 ```
-
 
 
 # Introduction and motivation
@@ -205,6 +217,82 @@ era.
 
 # Analysis and findings
 
-[FILL] Should include at least one plot or numerical summary for each of your questions, that helps the reader arrive at an answer. You should also write paragraphs describing the methods, summaries and findings. 
+##Q1. What are the common game mechanics and their changes in prevalent?
+```{r}
+q1_ratings <- ratings %>%
+  select(id, name)
+q1_details <- details %>%
+  select(id, boardgamecategory, yearpublished)
+
+Q1_data <- q1_ratings %>%
+  inner_join(q1_details,
+             by = "id")
+
+Q1_data <- Q1_data %>%
+  gather(type, value, boardgamecategory, -id, -name, -yearpublished) %>%
+  filter(!is.na(value)) %>%
+  separate_rows(value, sep = ",") %>%
+  arrange(id)
+
+Q1_data %>%
+  count(type, value, sort = TRUE)
+```
+
+
+```{r}
+Q1_data %>%
+  count(type, value, sort = TRUE) %>%
+  group_by(type) %>%
+  top_n(20, value) %>%
+  ungroup() %>%
+  mutate(value = reorder_within(value, n, type),
+         type = fct_reorder(type, n, .desc = TRUE)) %>%
+  ggplot(aes(x = value,
+             y = n,
+             fill = type)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~type, scales = "free_y") +
+  coord_flip() +
+  scale_x_reordered() +
+  labs(title = "Most Common Categories")
+```
+
+
+
+
+##Q2. What is the distribution of ratings for the games?
+```{r}
+q2_ratings <- ratings %>%
+  select(id, name, average)
+q2_details <- details %>%
+  select(id,yearpublished)
+
+Q2_data <- q2_ratings %>%
+  inner_join(q2_details,
+             by = "id")
+```
+
+
+```{r}
+# plot
+Q2_data %>%
+  filter(yearpublished >= 1990) %>%
+  ggplot(aes(x = average,y = ..density..)) +
+  geom_histogram(fill="#78a99c", 
+                 color="#3f6b61", 
+                 alpha=0.9) +
+  geom_density(color = 'red') +
+  labs(x = 'Average Rating',
+       y = 'Density',
+       title = 'Distribution of Average Ratings') +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) -> p
+ggplotly(p)
+
+# ks.test
+ks.test(x = Q2_data$average,'pnorm', 
+        mean = mean(Q2_data$average), 
+        sd = sd(Q2_data$average))
+```
 
 # References
