@@ -16,7 +16,20 @@ bibliography: references.bib
 [This assignment is for ETC5521 Assignment 1 by Team `r rmarkdown::metadata$team` comprising of `r knitr::combine_words(rmarkdown::metadata$author)`.]{style="color:#006DAE;"}
 
 
-```{r message=FALSE, echo=FALSE}
+```{r setup, include = TRUE, echo = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  eval = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 6,
+  fig.pos = "H"
+)
+```
+
+
+```{r}
 # library packages
 library(tidyverse)
 library(kableExtra)
@@ -31,12 +44,11 @@ library(broom)
 ```
 
 
-```{r message=FALSE, echo=FALSE}
+```{r}
 # read data
 ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
 details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
 ```
-
 
 
 # Introduction and motivation
@@ -62,10 +74,8 @@ So, we have tried to dig deeper into the data itself to show some reports and in
 a. **Source of the data**
 
 Our data comes from *Kaggle* by way of **Board Games Geek**, with a hattip to *David and Georgios*. 
-We could read the data in R via the following steps:
-
-* ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
-* details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
+We could find the data via the following website:
+https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-01-25
 
 
 b. **The structure of the data**
@@ -75,7 +85,8 @@ We have two initial datasets, **ratings** and **details**. The initial size of t
 * About **ratings** dataset:
 [This dataset](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv) contains information about the average rating , rank and theoretical rating average (bayes average). Every game's url and thumbnail link is also provided. It was collected over a time period of 100 AD to 2022.
 
-```{r message=FALSE, echo=FALSE}
+
+```{r}
 tibble(
   "variable" = colnames(ratings),
   "class" = c("double", "double", "character", "double", "double", "double",
@@ -95,7 +106,7 @@ tibble(
 AD to 2023.
 
 
-```{r message=FALSE, echo=FALSE}
+```{r}
 tibble(
   "variables" = colnames(details),
   "class" = c("double", "double", "character", "character", "double", "double",                   "double", "double", "double", "double", "double", "character",                      "character", "character", "character", "character", "character",                    "character", "character", "double", "double", "double", "double"),
@@ -222,7 +233,7 @@ era.
 # Analysis and findings
 
 ## Q1. What are the common game mechanics and their changes in prevalent?
-```{r, echo = FALSE, message = FALSE}
+```{r}
 q1_ratings <- ratings %>%
   select(id, name)
 q1_details <- details %>%
@@ -237,7 +248,7 @@ Q1_data$boardgamemechanic <- gsub('[]]', '', Q1_data$boardgamemechanic)
 ```
 
 
-```{r, echo = FALSE, message = FALSE}
+```{r}
 Q1_data <- Q1_data %>%
   
   separate_rows(boardgamemechanic, sep = ",") %>%
@@ -249,7 +260,7 @@ Q1_data$boardgamemechanic <- gsub('"', '', Q1_data$boardgamemechanic)
 ```
 
 
-```{r, table, echo = FALSE, message = FALSE}
+```{r, table1}
 Table1 = Q1_data %>%
   count(boardgamemechanic, sort = TRUE) %>%
   top_n(10)
@@ -260,7 +271,7 @@ knitr::kable(Table1, booktabs = TRUE, "html",
 ```
 
 
-```{r, figure1, fig.height=6, fig.width=8, echo = FALSE, message = FALSE}
+```{r, figure1}
 Q1_data %>%
   count(boardgamemechanic, sort = TRUE) %>%
   na.omit() %>%
@@ -281,7 +292,7 @@ ggplotly(p1)
 ```
 
 
-```{r, figure2, fig.height=6, fig.width=8, echo = FALSE, message = FALSE}
+```{r, figure2}
 Q1_data %>%
   filter(yearpublished %in% c(1990:2002, 2010:2022)) %>%
   mutate(year = ifelse(yearpublished <= 2002, "1990s", "2010s")) %>%
@@ -321,7 +332,7 @@ This is because modern board games are starting to include more mechanics, and t
 
 
 ## Q2. What is the distribution of ratings for the board games?
-```{r, echo = FALSE, message = FALSE}
+```{r}
 q2_ratings <- ratings %>%
   select(id, name, average)
 q2_details <- details %>%
@@ -333,7 +344,7 @@ Q2_data <- q2_ratings %>%
 ```
 
 
-```{r, figure3, echo = FALSE, message = FALSE}
+```{r, figure3}
 # plot
 Q2_data %>%
   filter(yearpublished >= 1990) %>%
@@ -352,7 +363,7 @@ ggplotly(p3)
 ```
 
 
-```{r, echo = FALSE, message = FALSE, warning = FALSE}
+```{r, table2}
 # ks.test
 ks.test <- ks.test(x = Q2_data$average, 'pnorm', 
                    mean = mean(Q2_data$average), 
@@ -369,5 +380,6 @@ knitr::kable(Table2, booktabs = TRUE, "html",
 ## Q2 Conclusion
 
 From the above table output we can see that the test statistic is 0.021989, corresponding to a p-value of 1.647e-09. Since the p-value is less than 0.05, we reject the original hypothesis. We have sufficient evidence that the board game ratings for this sample data are not from a normal distribution.
+
 
 # References
