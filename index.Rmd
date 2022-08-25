@@ -213,7 +213,7 @@ Q2.
 What is the distribution of ratings for the board games?
 
 Q3.
-Is there any relationship between average game time and ownership, min/max players. 
+Is there any relationship between average playing time of a game and ownership(or products sold), min/max players required to play that game. 
 
 Q4.
 How did the era of electronic games(starting from 2010-11) affect the number of people who want/wish/own board games? 
@@ -228,7 +228,7 @@ Q2.
 I guess the ratings for the games follow a normal distribution.
 
 Q3.
-More average play might mean less owners, as people might not want to invest too much time in a game, but it might be popular among bigger groups as board games keep a group engaged.
+More average play might mean less owners, as people might not want to invest too much time in a game, but it might be popular among bigger groups as board games keep a group engaged. But as the required number of players increase, the number of products sold should drop.
 
 Q4.
 The demand of board games should be lower after the start of electronic games 
@@ -388,7 +388,7 @@ knitr::kable(Table2, booktabs = TRUE, "html",
 From the above table output we can see that the test statistic is 0.021989, corresponding to a p-value of 1.647e-09. Since the p-value is less than 0.05, we reject the original hypothesis. We have sufficient evidence that the board game ratings for this sample data are not from a normal distribution.
 
 
-##Q3 Is there any relationship between average game time and ownership, min/max players. 
+##Q3 Is there any relationship between average playing time of a game and ownership, min/max players required to play that game. 
 
 ###Data preparation
 
@@ -459,8 +459,26 @@ Q3_dataset %>%
   theme(plot.title = element_text(hjust = 0.5),
         text = element_text(size = 15)) 
 
-
 ```
+```{r, tab}
+t <- Q3_dataset %>%
+  filter(playingtime <= 250) %>% 
+  group_by(minplayers) %>%
+  summarise(sum = sum(owned))
+
+knitr::kable(t, caption = "Minimum number of people required to play a game Vs games sold in that age category") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "hold_position"), 
+                full_width = T)
+```
+
+
+##Q3 Conclusion
+
+* According to the plot in figure \@ref(fig:plot1) one can clearly observe that    if the average playing time of boardgames **increases**, the number of people who own that game **decreases**. My reason to assume the same was, games which require a lot of time to finish, might be a less popular option for people as a result of lack of time.
+
+* To verify my result, I fitted a linear model for the variables and found out the slope was negative.
+
+* A game with more playing time might sell less products but it can be the popular with people who play games in big groups. I expected, as the number of people required to play a game increases, the game's selling numbers should drop. See Figure \@ref(fig:plot2), one can observe as the required players to play a game **increases**, the number of products sold decreased drastically (See also \@tab(tab:plot2) ) as smaller groups of people can more often indulge in boardgames.
 
 
 ##Q4 How did the era of electronic games(starting from 2012-13) affect the number of people who want/wish/own board games? 
@@ -514,8 +532,12 @@ plot1 <- Q4 %>%
 ggplotly(plot1)  
 ```
 
+##Q4 Conclusion
 
-
+* There is now almost no market for new casual board games, and even the classics sell only a fraction of their annual sales just a few years ago. the advent of apps had a much more profound effect, absolutely devastating sales of casual board games but paradoxically increasing interest in German-style games.
+Many popular  mobile games like Temple Run, Subway Surfer e.t.c were released around the year 2012-13 which led to the assumption that as games were more easily accessible more then than ever, the digital games era must have hurt the turnover of board game publishers.
+As one can observe the vertical line is at year 2013, after which there was a drastic drop in number of people who bought new board games or wish or want them.
+The number people owning a game peaked around year 2014 and then decreased by almost **5 times.** 
 
 # References
 
