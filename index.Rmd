@@ -77,14 +77,14 @@ So, we have tried to dig deeper into the data itself to show some reports and in
 
 # Data description
 
-a. **Source of the data**
+## Source of the data
 
 Our data comes from *Kaggle* by way of **Board Games Geek**, with a hattip to *David and Georgios*. 
 We could find the data via the following website:
 https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-01-25
 
 
-b. **The structure of the data**
+## The structure of the data
 
 We have two initial datasets, **ratings** and **details**. The initial size of the ratings dataset is around 4.8MB and contains 21631 observations and 10 columns. The original size of the details dataset is approximately 32.7MB, with 21831 observations and 23 columns.
 
@@ -133,6 +133,11 @@ tibble(
                 bootstrap_options = c("striped", "condensed", "bordered"))
 ```
 
+
+## Data Wrangling
+* separate rows: 
+* remove NA rows:
+* filter rows:
 
 # Questions of interest
 
