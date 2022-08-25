@@ -1,0 +1,24 @@
+Variable,Class,Description
+num,double,Game number
+id,double,Game ID
+primary,character,Primary name
+description,character,A paragraph of text describing the game
+yearpublished,double,Year game was published
+minplayers,double,Minimum recommended players
+maxplayers,double,Maximum recommended players
+playingtime,double,Average playtime
+minplaytime,double,Minimum recommended playtime
+maxplaytime,double,Maximum recommended playtime
+minage,double,Minimum recommended  age to play
+boardgamecategory,character,Categories for the game (separated by commas)
+boardgamemechanic,character,Game mechanic - how to play the game (separated by comma)
+boardgamefamily,character,Family of game - equivalent to a publisher
+boardgameexpansion,character,If there is an expansion pack - name of expansion
+boardgameimplementation,character,Implementation
+boardgamedesigner,character,Game designer
+boardgameartist,character,Artist for game art
+boardgamepublisher,character,Comoany/person who published the game (separated by comma)
+owned,double,Number of players who have a game
+trading,double,Number of players who trade a game
+wanting,double,Number of players who want a game
+wishing,double,Number of players who added a game in wish list

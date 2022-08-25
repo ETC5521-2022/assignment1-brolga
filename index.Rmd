@@ -87,14 +87,16 @@ We have two initial datasets, **ratings** and **details**. The initial size of t
 
 
 ```{r}
+# read ratings data structure csv
+ratings_structure <- read_csv("ratings.csv")
+```
+
+
+```{r}
 tibble(
-  "variable" = colnames(ratings),
-  "class" = c("double", "double", "character", "double", "double", "double",
-              "double", "double", "character", "character"),
-  "description" = c("Game number", "Game ID", "Game name", "The year game was 
-                    released", "Game rank", "Average rating received by players",
-                    "Bayes average rating", "Number of users rated the game",
-                    "url of game", "link for thumbnail of game")
+  "variable" = colnames(ratings %in% c(id, name, average)),
+  "class" = c("double", "character", "double"),
+  "description" = c("Game ID", "Game name", "Average rating on Board Games Geek (1-10)")
 ) %>%
   kable() %>%
   kable_styling(full_width = F,
@@ -107,9 +109,15 @@ AD to 2023.
 
 
 ```{r}
+# read details data structure csv
+details_structure <- read_csv("details.csv")
+```
+
+
+```{r}
 tibble(
   "variables" = colnames(details),
-  "class" = c("double", "double", "character", "character", "double", "double",                   "double", "double", "double", "double", "double", "character",                      "character", "character", "character", "character", "character",                    "character", "character", "double", "double", "double", "double"),
+  "class" = c("double", "double", "character", "character", "double", "double", "double", "double", "double", "double", "double", "character", "character", "character", "character", "character", "character",                    "character", "character", "double", "double", "double", "double"),
   "dsecription" = c("Game number", "Game ID", "Game name", "description of game",
                     "year game was published", "minimum number of players", 
                     "maximum number of players", "Playing time in minutes",
@@ -260,14 +268,15 @@ Q1_data$boardgamemechanic <- gsub('"', '', Q1_data$boardgamemechanic)
 ```
 
 
-```{r, table1}
+```{r, table1, }
 Table1 = Q1_data %>%
   count(boardgamemechanic, sort = TRUE) %>%
   top_n(10)
 knitr::kable(Table1, booktabs = TRUE, "html",
              caption = "The Most Common Game Mechanics") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "hold_position"), 
-                full_width = F)
+                full_width = F,
+                font_size = 14)
 ```
 
 

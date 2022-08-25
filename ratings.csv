@@ -1,0 +1,12 @@
+Variable,Class,Description
+num,double,Game number
+id,double,Game ID
+name,character,Game name
+year,double,Game year
+rank,double,Game rank
+average,double,"Average rating on Board Games Geek (1-10)
+"
+bayes_average,double,Bayes average rating
+users_rated,double,Number of users that rated the game
+url,character,Game url
+thumbnail,character,URL thumbnail of the game
