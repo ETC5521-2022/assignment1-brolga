@@ -69,6 +69,13 @@ My teammates and I are both interested in board games and have tried many intere
 So, we have tried to dig deeper into the data itself to show some reports and interesting data visualisations of the results.
 
 
+## Data limitations:
+
+* The original data contains about 15-19 million reviews, and the data in the dataset should be filtered to affect the results of analyzing whether the mean scores of the games conform to a normal distribution.
+
+* There will be some irregularly recorded data inside the dataset, for example, there will be games with negative time years and 0 inside **yearpulished** varieble, which may bring limitations to our analysis.
+
+
 # Data description
 
 a. **Source of the data**
@@ -94,7 +101,7 @@ ratings_structure <- read_csv("ratings.csv")
 
 ```{r}
 tibble(
-  "variable" = colnames(ratings %in% c(id, name, average)),
+  "variable" = colnames(ratings %in% c("id", "name", "average")),
   "class" = c("double", "character", "double"),
   "description" = c("Game ID", "Game name", "Average rating on Board Games Geek (1-10)")
 ) %>%
@@ -116,19 +123,11 @@ details_structure <- read_csv("details.csv")
 
 ```{r}
 tibble(
-  "variables" = colnames(details),
-  "class" = c("double", "double", "character", "character", "double", "double", "double", "double", "double", "double", "double", "character", "character", "character", "character", "character", "character",                    "character", "character", "double", "double", "double", "double"),
-  "dsecription" = c("Game number", "Game ID", "Game name", "description of game",
-                    "year game was published", "minimum number of players", 
-                    "maximum number of players", "Playing time in minutes",
-                    "minimum playing time", "maximum playing time", 
-                    "minimum age to play the game", "Category", "Mechanic",
-                    "board game family", "add-on tools in game", "implementation",
-                    "designer of game", "Artist of game", "publisher of game",
-                    "number of people who own the game", 
-                    "number of people who trade the game", 
-                    "number of people who want the game", 
-                    "number of people who wish to get the game")
+  "variables" = colnames(details %in% c("id", "yearpublished", "boardgamemechanic")),
+  "class" = c("double", "double", "character"),
+  "dsecription" = c("Game ID", 
+                    "Year game was published", 
+                    "Game mechanic - how to play the game (separated by comma)")
 ) %>%
   kable() %>%
   kable_styling(full_width = F,
@@ -245,7 +244,7 @@ era.
 q1_ratings <- ratings %>%
   select(id, name)
 q1_details <- details %>%
-  select(id, boardgamemechanic, yearpublished)
+  select(id, yearpublished, boardgamemechanic)
 
 Q1_data <- q1_ratings %>%
   inner_join(q1_details,
