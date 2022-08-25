@@ -24,6 +24,7 @@ library(tidyr)
 library(ggplot2)
 library(plotly)
 library(performance)
+library(stringr)
 ```
 
 
@@ -32,6 +33,7 @@ library(performance)
 ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
 details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
 ```
+
 
 
 # Introduction and motivation
@@ -222,42 +224,84 @@ era.
 q1_ratings <- ratings %>%
   select(id, name)
 q1_details <- details %>%
-  select(id, boardgamecategory, yearpublished)
+  select(id, boardgamemechanic, yearpublished)
 
 Q1_data <- q1_ratings %>%
   inner_join(q1_details,
              by = "id")
 
+Q1_data$boardgamemechanic <- gsub('[[]', '', Q1_data$boardgamemechanic)
+Q1_data$boardgamemechanic <- gsub('[]]', '', Q1_data$boardgamemechanic)
+```
+
+
+```{r}
 Q1_data <- Q1_data %>%
-  gather(type, value, boardgamecategory, -id, -name, -yearpublished) %>%
-  filter(!is.na(value)) %>%
-  separate_rows(value, sep = ",") %>%
+  
+  separate_rows(boardgamemechanic, sep = ",") %>%
   arrange(id)
 
+Q1_data$boardgamemechanic <- gsub("'", '', Q1_data$boardgamemechanic)
+Q1_data$boardgamemechanic <- str_trim(Q1_data$boardgamemechanic)
+Q1_data$boardgamemechanic <- gsub('"', '', Q1_data$boardgamemechanic)
+
+Table1 = Q1_data %>%
+  count(boardgamemechanic, sort = TRUE) %>%
+  top_n(10)
+knitr::kable(Table1, booktabs = TRUE, "html",
+             caption = "The Most Common Game Mechanics") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+
+```{r, fig.height=6, fig.width=8}
 Q1_data %>%
-  count(type, value, sort = TRUE)
+  count(boardgamemechanic, sort = TRUE) %>%
+  na.omit() %>%
+  top_n(20) %>%
+  ggplot(aes(x = reorder(boardgamemechanic, n),
+             y = n)) +
+  geom_col(fill = "#78a99c",
+           color = "#3f6b61",
+           show.legend = FALSE) +
+  coord_flip() +
+  scale_x_reordered() +
+  labs(x = "Number",
+       y = "Mechanics",
+       title = "Most Common Mechanics") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) -> p1
+ggplotly(p1)
 ```
 
 
 ```{r}
 Q1_data %>%
-  count(type, value, sort = TRUE) %>%
-  group_by(type) %>%
-  top_n(20, value) %>%
-  ungroup() %>%
-  mutate(value = reorder_within(value, n, type),
-         type = fct_reorder(type, n, .desc = TRUE)) %>%
-  ggplot(aes(x = value,
-             y = n,
-             fill = type)) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~type, scales = "free_y") +
-  coord_flip() +
-  scale_x_reordered() +
-  labs(title = "Most Common Categories")
+  filter(yearpublished %in% c(1990:2002, 2010:2022)) %>%
+  mutate(year = ifelse(yearpublished <= 2002, "1990s", "2010s")) %>%
+  group_by(year, boardgamemechanic) %>%
+  summarise(count = n()) %>%
+  top_n(20) %>%
+  spread(key = year, value = count) %>%
+  na.omit() %>%
+  ggplot() +
+  geom_point(aes(x = `1990s`,
+                 y = reorder(boardgamemechanic, `2010s` - `1990s`)), 
+             color = "#Aa3428") +
+  geom_point(aes(x = `2010s`,
+                 y = boardgamemechanic), 
+             color = "#609c6c",
+             size = 3) +
+  geom_segment(aes(x = `1990s`, 
+                   xend = `2010s`,
+                   y = boardgamemechanic, 
+                   yend = boardgamemechanic)) +
+  theme_minimal() +
+  labs(x = "Number",
+       y = "Mechanics", 
+       title = "Most Prevalent Mechanics in the 1990s and 2010s") -> p2
+ggplotly(p2)
 ```
-
-
 
 
 ##Q2. What is the distribution of ratings for the games?
@@ -286,8 +330,8 @@ Q2_data %>%
        y = 'Density',
        title = 'Distribution of Average Ratings') +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5)) -> p
-ggplotly(p)
+  theme(plot.title = element_text(hjust = 0.5)) -> p3
+ggplotly(p3)
 
 # ks.test
 ks.test(x = Q2_data$average,'pnorm', 
