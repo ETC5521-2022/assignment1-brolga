@@ -389,6 +389,123 @@ knitr::kable(Table2, booktabs = TRUE, "html",
 From the above table output we can see that the test statistic is 0.021989, corresponding to a p-value of 1.647e-09. Since the p-value is less than 0.05, we reject the original hypothesis. We have sufficient evidence that the board game ratings for this sample data are not from a normal distribution.
 
 
+##Q3 Is there any relationship between average game time and ownership, min/max players. 
+
+* **Data preparation**
+
+```{r}
+q3_ratings <- ratings %>%
+  select(id, name)
+
+q3_details <- details %>%
+  select(id, minplayers, maxplayers, playingtime, owned)
+
+Q3_dataset <- q3_ratings %>%
+  inner_join(q3_details,
+             by = "id")  
+```
+
+* **Analysis**
+
+```{r, plot1}
+
+plot <- Q3_dataset %>%
+  filter(playingtime <= 500) %>%
+  ggplot(
+       aes(x = playingtime,
+           y = owned)) +
+  geom_line(color = "#F6370F") +
+  xlab("Average playing time of a game") +
+  ylab("Number of people who own the game") +
+  labs(title = "Number of people who own the game Vs Average playing time") +
+  labs(colour = "Current status of people") +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10)) 
+
+ggplotly(plot)
+```
+
+```{r}
+lm(owned ~ playingtime, Q3_dataset)
+
+```
+
+```{r, plot2}
+
+Q3_dataset %>%
+  filter(playingtime <= 250) %>% 
+  group_by(minplayers, playingtime) %>%
+  summarise(sum = sum(owned)) %>% 
+  ggplot(
+       aes(x = playingtime,
+           y = sum)) +
+  geom_bar(stat = "identity",
+           color = "#F6370F") +
+  facet_wrap(~minplayers,
+             scales = "free")+
+  xlab("Average playing time of a game") +
+  ylab("Number of people who own the game") +
+  labs(title = "Number of players required to play a game for average playing time") +
+  labs(colour = "Current status of people") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 15)) 
+
+
+```
+
+
+##Q4 How did the era of electronic games(starting from 2012-13) affect the number of people who want/wish/own board games? 
+
+* **Data preparation**
+
+```{r}
+
+q4_ratings <- ratings %>%
+  select(id, name)
+
+q4_details <- details %>%
+  select(id, yearpublished, trading, wanting, owned, wishing)
+
+Q4_dataset <- q4_ratings %>%
+  inner_join(q4_details,
+             by = "id")  
+
+Q4 <- Q4_dataset %>%
+  pivot_longer(!c(id, name, yearpublished),
+               names_to = "status",
+               values_to = "number_of _people")
+
+```
+
+* **Data Analysis**
+
+```{r, plot3}
+
+plot1 <- Q4 %>%
+  filter(yearpublished >= 1990) %>%
+  group_by(status, yearpublished) %>%
+  summarise(mum_of_people = sum(`number_of _people`)) %>%
+  ggplot(aes(x = yearpublished,
+             y = mum_of_people,
+             colour = status)) +
+    geom_line() +
+  geom_vline(xintercept = 2013) +
+  xlab("Gmaes published in the given year") +
+  ylab("Number of people") +
+  labs(title = "Games sold over the years") +
+  labs(colour = "Current status of people") +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 8))  
+
+ggplotly(plot1)  
+```
+
+
+
+
 # References
 
 C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman
