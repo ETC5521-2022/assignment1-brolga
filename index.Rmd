@@ -228,8 +228,7 @@ Q2.
 I guess the ratings for the games follow a normal distribution.
 
 Q3.
-More average play might mean less owners but might be popular among bigger groups 
-of people.
+More average play might mean less owners, as people might not want to invest too much time in a game, but it might be popular among bigger groups as board games keep a group engaged.
 
 Q4.
 The demand of board games should be lower after the start of electronic games 
@@ -391,7 +390,9 @@ From the above table output we can see that the test statistic is 0.021989, corr
 
 ##Q3 Is there any relationship between average game time and ownership, min/max players. 
 
-* **Data preparation**
+###Data preparation
+
+* Selecting variables needed for the analysis from both datasets and the joining them to make the data tidy.
 
 ```{r}
 q3_ratings <- ratings %>%
@@ -405,7 +406,9 @@ Q3_dataset <- q3_ratings %>%
              by = "id")  
 ```
 
-* **Analysis**
+###Analysis
+
+* Plotting total number of owners of a game against their owned game average playing time to get the if there is any correlation.  
 
 ```{r, plot1}
 
@@ -426,10 +429,14 @@ plot <- Q3_dataset %>%
 ggplotly(plot)
 ```
 
+* Checking linear model co-efficients to confirm my observation.
+
 ```{r}
 lm(owned ~ playingtime, Q3_dataset)
 
 ```
+
+* Plotting for different number of minimum players for a game to see, if a game requires more number of people, it has more playing time which in turn means less sold products.  
 
 ```{r, plot2}
 
@@ -458,7 +465,9 @@ Q3_dataset %>%
 
 ##Q4 How did the era of electronic games(starting from 2012-13) affect the number of people who want/wish/own board games? 
 
-* **Data preparation**
+###Data preparation
+
+* Selecting variables needed for the analysis from both datasets and the joining them to make the data tidy.
 
 ```{r}
 
@@ -479,7 +488,9 @@ Q4 <- Q4_dataset %>%
 
 ```
 
-* **Data Analysis**
+###Data Analysis
+
+* Plotting graph to see if along the years board games sold, or number of people  wishing/wanting to own game have dropped or not.  
 
 ```{r, plot3}
 
