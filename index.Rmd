@@ -122,11 +122,18 @@ details_structure <- read_csv("details.csv")
 
 ```{r}
 tibble(
-  "variables" = colnames(details %in% c("id", "yearpublished", "boardgamemechanic")),
-  "class" = c("double", "double", "character"),
+  "variables" = colnames(details %in% c("id", "yearpublished", "boardgamemechanic", "minplayers", "maxplayers", "playingtime", "owned", "trading", "wanting", "wishing")),
+  "class" = c("double", "double", "character", "number", "number", "number", "number", "number", "number", "number"),
   "dsecription" = c("Game ID", 
                     "Year game was published", 
-                    "Game mechanic - how to play the game (separated by comma)")
+                    "Game mechanic - how to play the game (separated by comma)",
+                    "Minimum number of players required to play",
+                    "Maximum number of players required to play",
+                    "Average playing time of a game",
+                    "People who own a game",
+                    "People who trade a game",
+                    "People who want to own a game",
+                    "People who wish to own a game")
 ) %>%
   kable() %>%
   kable_styling(full_width = F,
@@ -410,7 +417,7 @@ Q3_dataset <- q3_ratings %>%
 
 * Plotting total number of owners of a game against their owned game average playing time to get the if there is any correlation.  
 
-```{r plot-a}
+```{r plot-a, fig.cap = "Relationship between average game time and games owned"}
 
 plot <- Q3_dataset %>%
   filter(playingtime <= 500)%>%
@@ -434,12 +441,11 @@ ggplotly(plot)
 
 ```{r}
 lm(owned ~ playingtime, Q3_dataset)
-
 ```
 
 * Plotting for different number of minimum players for a game to see, if a game requires more number of people, it has more playing time which in turn means less sold products.  
 
-```{r plot-b}
+```{r plot-b, fig.cap = "Relationship between average game time and games owned faceted for diiferent minimum players required"}
 
 Q3_dataset %>%
   filter(playingtime <= 250) %>%
