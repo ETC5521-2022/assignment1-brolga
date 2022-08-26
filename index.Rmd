@@ -419,7 +419,7 @@ knitr::kable(Table2, booktabs = TRUE, "html",
 
 ### Data preparation
 
-* Selecting variables needed for the analysis from both datasets and the joining them to make the data tidy.
+* Selecting variables needed for the analysis from both datasets and the joining(using inner_join) them to make the data tidy.
 
 ```{r}
 q3_ratings <- ratings %>%
@@ -435,7 +435,7 @@ Q3_dataset <- q3_ratings %>%
 
 ### Analysis
 
-* Plotting total number of owners of a game against their owned game average playing time to get the if there is any correlation.  
+* Plotting total number of owners of a game against their owned game average playing time, after filtering playing time less than 500 min to get the if there is any correlation.  
 
 ```{r plot-a, fig.cap = "Relationship between average game time and games owned"}
 
@@ -516,7 +516,7 @@ knitr::kable(t, caption = "Minimum number of people required to play a game Vs g
 
 ### Data preparation
 
-* Selecting variables needed for the analysis from both datasets and the joining them to make the data tidy.
+* Selecting variables needed for the analysis from both datasets and the joining them to make the data tidy. Pivoting data to get a better perspective to understand data. 
 
 ```{r}
 
