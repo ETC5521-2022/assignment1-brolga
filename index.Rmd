@@ -128,14 +128,14 @@ tibble(
               "character", "double", "double", "double", "double"),
   "dsecription" = c("Game ID", 
                     "Year game was published", 
-                    "Minimum recommended players",
-                    "Maximum recommended players",
-                    "Average playtime",
                     "Game mechanic - how to play the game (separated by comma)",
-                    "Number of players who have a game",
-                    "Number of players who trade a game",
-                    "Number of players who want a game",
-                    "Number of players who added a game in wish list")
+                    "Minimum number of players required to play",
+                    "Maximum number of players required to play",
+                    "Average playing time of a game",
+                    "People who own a game",
+                    "People who trade a game",
+                    "People who want to own a game",
+                    "People who wish to own a game")
 ) %>%
   kable() %>%
   kable_styling(full_width = F,
@@ -151,9 +151,9 @@ tibble(
 
 * separate rows: A board game may have multiple game mechanics, and I use **separate_rows** function that splits each game mechanic by comma and then calculates
 
-* remove NA rows: Among the variables we select, there are some **NA** values that affect our plotting results, therefore, I used **na.omit** function deleted NA rows
+* remove NA rows: Among the variables we select, there are some **NA** values that affect our plotting results, therefore, I use **na.omit** function to delete NA rows
 
-* remove special characters: I split the game mechanics, but there arre special symbols inside the strings, so I use **gsub** function to delete all the special symbols, including **[]**, **'**, and **"**
+* remove special characters: I split the game mechanics, but there arre special symbols inside the strings, so I use **gsub** function to delete all the special symbols
 
 
 # Questions of interest
@@ -437,10 +437,11 @@ Q3_dataset <- q3_ratings %>%
 
 * Plotting total number of owners of a game against their owned game average playing time to get the if there is any correlation.  
 
-```{r plot-p}
+```{r plot-a, fig.cap = "Relationship between average game time and games owned"}
 
 plot <- Q3_dataset %>%
-  filter(playingtime <= 500) %>%
+  filter(playingtime <= 500)%>%
+  na.omit() %>%
   ggplot(
        aes(x = playingtime,
            y = owned)) +
@@ -460,15 +461,15 @@ ggplotly(plot)
 
 ```{r}
 lm(owned ~ playingtime, Q3_dataset)
-
 ```
 
 * Plotting for different number of minimum players for a game to see, if a game requires more number of people, it has more playing time which in turn means less sold products.  
 
-```{r, plot2}
+```{r plot-b, fig.cap = "Relationship between average game time and games owned faceted for diiferent minimum players required"}
 
 Q3_dataset %>%
-  filter(playingtime <= 250) %>% 
+  filter(playingtime <= 250) %>%
+  na.omit() %>% 
   group_by(minplayers, playingtime) %>%
   summarise(sum = sum(owned)) %>% 
   ggplot(
@@ -484,10 +485,13 @@ Q3_dataset %>%
   labs(colour = "Current status of people") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5),
-        text = element_text(size = 15)) 
+        text = element_text(size = 10)) 
 
 ```
-```{r, tab}
+
+
+```{r tab}
+
 t <- Q3_dataset %>%
   filter(playingtime <= 250) %>% 
   group_by(minplayers) %>%
@@ -501,11 +505,11 @@ knitr::kable(t, caption = "Minimum number of people required to play a game Vs g
 
 ## Q3 Conclusion
 
-* According to the plot in figure \@ref(fig:plot-p) one can clearly observe that    if the average playing time of boardgames **increases**, the number of people who own that game **decreases**. My reason to assume the same was, games which require a lot of time to finish, might be a less popular option for people as a result of lack of time.
+* According to the plot in figure \@ref(fig:plot-a) one can clearly observe that if the average playing time of board games **increases**, the number of people who own that game **decreases**. My reason to assume the same was, games which require a lot of time to finish, might be a less popular option for people as a result of lack of time.
 
 * To verify my result, I fitted a linear model for the variables and found out the slope was negative.
 
-* A game with more playing time might sell less products but it can be the popular with people who play games in big groups. I expected, as the number of people required to play a game increases, the game's selling numbers should drop. See Figure \@ref(fig:plot2), one can observe as the required players to play a game **increases**, the number of products sold decreased drastically (See also \@tab(tab:plot2) ) as smaller groups of people can more often indulge in boardgames.
+* A game with more playing time might sell less products but it can be the popular with people who play games in big groups. I expected, as the number of people required to play a game increases, the game's selling numbers should drop. See Figure \@ref(fig:plot-b), one can observe as the required players to play a game **increases**, the number of products sold decreased drastically (See also \@ref(tab:tab) ) as smaller groups of people can more often indulge in board games.
 
 
 ## Q4 How did the era of electronic games(starting from 2012-13) affect the number of people who want/wish/own board games? 
@@ -562,9 +566,18 @@ ggplotly(plot1)
 ## Q4 Conclusion
 
 * There is now almost no market for new casual board games, and even the classics sell only a fraction of their annual sales just a few years ago. the advent of apps had a much more profound effect, absolutely devastating sales of casual board games but paradoxically increasing interest in German-style games.
-Many popular  mobile games like Temple Run, Subway Surfer e.t.c were released around the year 2012-13 which led to the assumption that as games were more easily accessible more then than ever, the digital games era must have hurt the turnover of board game publishers.
-As one can observe the vertical line is at year 2013, after which there was a drastic drop in number of people who bought new board games or wish or want them.
+
+* Many popular  mobile games like Temple Run, Subway Surfer e.t.c were released around the year 2012-13 which led to the assumption that as games were more easily accessible more then than ever, the digital games era must have hurt the turnover of board game publishers.
+
+* As one can observe the vertical line is at year 2013, after which there was a drastic drop in number of people who bought new board games or wish or want them.
 The number people owning a game peaked around year 2014 and then decreased by almost **5 times.** 
+
+
+# Conclusion
+
+The top 20 most common game mechanics have become more and more popular over the past few decades. The most common game mechanic being **Dice Rolling**. This was achieved by doing some text analysis of the selected columns, taking the help of functions like **seperate_row, gsub.** Plotting histogram and performing **KS-test statistic** on ratings of board games, helped us came to a conclusion that the board games rating from this data set does not follow normal distribution. The average playing time of a board game and minimum number of players required to play a game is **inversely proportional** to the number of games sold. We took a look at the linear model coefficients to confirm our assumption and observation.  
+Data pivoting enabled us to rearrange the columns and rows in a report so we can view data from different perspectives. The era of mobile games affected people's interest in board games negatively as after year 2012-13 the number of games owned/want/wish/trade dropped drastically.
+
 
 # References
 
