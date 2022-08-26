@@ -100,7 +100,7 @@ ratings_structure <- read_csv("ratings.csv")
 
 ```{r}
 tibble(
-  "variable" = colnames(ratings %in% c("id", "name", "average")),
+  "variable" = c("id", "name", "average"),
   "class" = c("double", "character", "double"),
   "description" = c("Game ID", "Game name", "Average rating on Board Games Geek (1-10)")
 ) %>%
@@ -122,11 +122,20 @@ details_structure <- read_csv("details.csv")
 
 ```{r}
 tibble(
-  "variables" = colnames(details %in% c("id", "yearpublished", "boardgamemechanic")),
-  "class" = c("double", "double", "character"),
+  "variable" = c("id", "yearpublished", "minplayers", "maxplayers", "playingtime", 
+                  "boardgamemechanic", "owned", "trading", "wanting", "wishing"),
+  "class" = c("double", "double", "double", "double", "double", 
+              "character", "double", "double", "double", "double"),
   "dsecription" = c("Game ID", 
                     "Year game was published", 
-                    "Game mechanic - how to play the game (separated by comma)")
+                    "Minimum recommended players",
+                    "Maximum recommended players",
+                    "Average playtime",
+                    "Game mechanic - how to play the game (separated by comma)",
+                    "Number of players who have a game",
+                    "Number of players who trade a game",
+                    "Number of players who want a game",
+                    "Number of players who added a game in wish list")
 ) %>%
   kable() %>%
   kable_styling(full_width = F,
@@ -135,9 +144,17 @@ tibble(
 
 
 ## Data Wrangling
-* separate rows: 
-* remove NA rows:
-* filter rows:
+
+* filter rows: We have about 30 non-repeating variables in our datasets, so we use the **select** function to filter out the variables we want to use before analyzing the questions
+
+* join: Our data comes from two datasets, but they have some same variables, so we use the **join** function to merge them together for analysis
+
+* separate rows: A board game may have multiple game mechanics, and I use **separate_rows** function that splits each game mechanic by comma and then calculates
+
+* remove NA rows: Among the variables we select, there are some **NA** values that affect our plotting results, therefore, I used **na.omit** function deleted NA rows
+
+* remove special characters: I split the game mechanics, but there arre special symbols inside the strings, so I use **gsub** function to delete all the special symbols, including **[]**, **'**, and **"**
+
 
 # Questions of interest
 
@@ -218,7 +235,7 @@ Q2.
 What is the distribution of ratings for the board games?
 
 Q3.
-Is there any relationship between average game time and ownership, min/max players. 
+Is there any relationship between average playing time of a game and ownership(or products sold), min/max players required to play that game. 
 
 Q4.
 How did the era of electronic games(starting from 2010-11) affect the number of people who want/wish/own board games? 
@@ -233,8 +250,7 @@ Q2.
 I guess the ratings for the games follow a normal distribution.
 
 Q3.
-More average play might mean less owners but might be popular among bigger groups 
-of people.
+More average play might mean less owners, as people might not want to invest too much time in a game, but it might be popular among bigger groups as board games keep a group engaged. But as the required number of players increase, the number of products sold should drop.
 
 Q4.
 The demand of board games should be lower after the start of electronic games 
@@ -244,6 +260,9 @@ era.
 # Analysis and findings
 
 ## Q1. What are the common game mechanics and their changes in prevalent?
+
+### Data Wrangling
+
 ```{r}
 q1_ratings <- ratings %>%
   select(id, name)
@@ -256,12 +275,8 @@ Q1_data <- q1_ratings %>%
 
 Q1_data$boardgamemechanic <- gsub('[[]', '', Q1_data$boardgamemechanic)
 Q1_data$boardgamemechanic <- gsub('[]]', '', Q1_data$boardgamemechanic)
-```
 
-
-```{r}
 Q1_data <- Q1_data %>%
-  
   separate_rows(boardgamemechanic, sep = ",") %>%
   arrange(id)
 
@@ -270,6 +285,8 @@ Q1_data$boardgamemechanic <- str_trim(Q1_data$boardgamemechanic)
 Q1_data$boardgamemechanic <- gsub('"', '', Q1_data$boardgamemechanic)
 ```
 
+
+### Analysis
 
 ```{r, table1, }
 Table1 = Q1_data %>%
@@ -335,15 +352,17 @@ ggplotly(p2)
 
 ## Q1 Conclusion
 
-a.
-According to above table and column plot, we can find that the most common game mechanic is **Dice Rolling**, unsurprisingly. This is because **Dice Rolling** itself is a mechanic that can be used in many games. It has been around for a long time, and ancient peoples could make simple dice out of stones, clay, bones, etc. to play the game, so **Dice Rolling** is often seen as the most dominant symbol of board games (Sofiia & Joseph Alexander, 2017).
+* According to above table and column plot, we can find that the most common game mechanic is **Dice Rolling**, unsurprisingly. This is because **Dice Rolling** itself is a mechanic that can be used in many games. It has been around for a long time, and ancient peoples could make simple dice out of stones, clay, bones, etc. to play the game, so **Dice Rolling** is often seen as the most dominant symbol of board games (Sofiia & Joseph Alexander, 2017).
 
-b.
-Before I analyzed this question, I made an inference based on the actual situation of family and friends in my life -- the most common board game mechanics will become more and more popular. With lollipop plot above, we can see that the top 20 most common game mechanics have become more and more popular over the past few decades. This is consistent with my previous assumptions. 
-This is because modern board games are starting to include more mechanics, and the variety of games is becoming richer over time, so board games as a whole can also appeal to a wider audience. Another very important reason is that we now have a better standard of living and more free time, and the increase in leisure time is an obvious driver of demand for entertainment products such as board games.
+* Before I analyzed this question, I made an inference based on the actual situation of family and friends in my life -- the most common board game mechanics will become more and more popular. With lollipop plot above, we can see that the top 20 most common game mechanics have become more and more popular over the past few decades. This is consistent with my previous assumptions. 
+
+* This is because modern board games are starting to include more mechanics, and the variety of games is becoming richer over time, so board games as a whole can also appeal to a wider audience. Another very important reason is that we now have a better standard of living and more free time, and the increase in leisure time is an obvious driver of demand for entertainment products such as board games.
 
 
 ## Q2. What is the distribution of ratings for the board games?
+
+### Data Wrangling
+
 ```{r}
 q2_ratings <- ratings %>%
   select(id, name, average)
@@ -355,6 +374,8 @@ Q2_data <- q2_ratings %>%
              by = "id")
 ```
 
+
+### Analysis
 
 ```{r, figure3}
 # plot
@@ -391,8 +412,159 @@ knitr::kable(Table2, booktabs = TRUE, "html",
 
 ## Q2 Conclusion
 
-From the above table output we can see that the test statistic is 0.021989, corresponding to a p-value of 1.647e-09. Since the p-value is less than 0.05, we reject the original hypothesis. We have sufficient evidence that the board game ratings for this sample data are not from a normal distribution.
+* From the above table output we can see that the test statistic is 0.021989, corresponding to a p-value of 1.647e-09. Since the p-value is less than 0.05, we reject the original hypothesis. We have sufficient evidence that the board game ratings for this sample data are not from a normal distribution.
 
+
+## Q3 Is there any relationship between average playing time of a game and ownership, min/max players required to play that game. 
+
+### Data preparation
+
+* Selecting variables needed for the analysis from both datasets and the joining them to make the data tidy.
+
+```{r}
+q3_ratings <- ratings %>%
+  select(id, name)
+
+q3_details <- details %>%
+  select(id, minplayers, maxplayers, playingtime, owned)
+
+Q3_dataset <- q3_ratings %>%
+  inner_join(q3_details,
+             by = "id")  
+```
+
+### Analysis
+
+* Plotting total number of owners of a game against their owned game average playing time to get the if there is any correlation.  
+
+```{r plot-p}
+
+plot <- Q3_dataset %>%
+  filter(playingtime <= 500) %>%
+  ggplot(
+       aes(x = playingtime,
+           y = owned)) +
+  geom_line(color = "#F6370F") +
+  xlab("Average playing time of a game") +
+  ylab("Number of people who own the game") +
+  labs(title = "Number of people who own the game Vs Average playing time") +
+  labs(colour = "Current status of people") +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10)) 
+
+ggplotly(plot)
+```
+
+* Checking linear model co-efficients to confirm my observation.
+
+```{r}
+lm(owned ~ playingtime, Q3_dataset)
+
+```
+
+* Plotting for different number of minimum players for a game to see, if a game requires more number of people, it has more playing time which in turn means less sold products.  
+
+```{r, plot2}
+
+Q3_dataset %>%
+  filter(playingtime <= 250) %>% 
+  group_by(minplayers, playingtime) %>%
+  summarise(sum = sum(owned)) %>% 
+  ggplot(
+       aes(x = playingtime,
+           y = sum)) +
+  geom_bar(stat = "identity",
+           color = "#F6370F") +
+  facet_wrap(~minplayers,
+             scales = "free")+
+  xlab("Average playing time of a game") +
+  ylab("Number of people who own the game") +
+  labs(title = "Number of players required to play a game for average playing time") +
+  labs(colour = "Current status of people") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 15)) 
+
+```
+```{r, tab}
+t <- Q3_dataset %>%
+  filter(playingtime <= 250) %>% 
+  group_by(minplayers) %>%
+  summarise(sum = sum(owned))
+
+knitr::kable(t, caption = "Minimum number of people required to play a game Vs games sold in that age category") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "hold_position"), 
+                full_width = T)
+```
+
+
+## Q3 Conclusion
+
+* According to the plot in figure \@ref(fig:plot-p) one can clearly observe that    if the average playing time of boardgames **increases**, the number of people who own that game **decreases**. My reason to assume the same was, games which require a lot of time to finish, might be a less popular option for people as a result of lack of time.
+
+* To verify my result, I fitted a linear model for the variables and found out the slope was negative.
+
+* A game with more playing time might sell less products but it can be the popular with people who play games in big groups. I expected, as the number of people required to play a game increases, the game's selling numbers should drop. See Figure \@ref(fig:plot2), one can observe as the required players to play a game **increases**, the number of products sold decreased drastically (See also \@tab(tab:plot2) ) as smaller groups of people can more often indulge in boardgames.
+
+
+## Q4 How did the era of electronic games(starting from 2012-13) affect the number of people who want/wish/own board games? 
+
+### Data preparation
+
+* Selecting variables needed for the analysis from both datasets and the joining them to make the data tidy.
+
+```{r}
+
+q4_ratings <- ratings %>%
+  select(id, name)
+
+q4_details <- details %>%
+  select(id, yearpublished, trading, wanting, owned, wishing)
+
+Q4_dataset <- q4_ratings %>%
+  inner_join(q4_details,
+             by = "id")  
+
+Q4 <- Q4_dataset %>%
+  pivot_longer(!c(id, name, yearpublished),
+               names_to = "status",
+               values_to = "number_of _people")
+
+```
+
+### Data Analysis
+
+* Plotting graph to see if along the years board games sold, or number of people  wishing/wanting to own game have dropped or not.  
+
+```{r, plot3}
+
+plot1 <- Q4 %>%
+  filter(yearpublished >= 1990) %>%
+  group_by(status, yearpublished) %>%
+  summarise(mum_of_people = sum(`number_of _people`)) %>%
+  ggplot(aes(x = yearpublished,
+             y = mum_of_people,
+             colour = status)) +
+    geom_line() +
+  geom_vline(xintercept = 2013) +
+  xlab("Gmaes published in the given year") +
+  ylab("Number of people") +
+  labs(title = "Games sold over the years") +
+  labs(colour = "Current status of people") +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 8))  
+
+ggplotly(plot1)  
+```
+
+## Q4 Conclusion
+
+* There is now almost no market for new casual board games, and even the classics sell only a fraction of their annual sales just a few years ago. the advent of apps had a much more profound effect, absolutely devastating sales of casual board games but paradoxically increasing interest in German-style games.
+Many popular  mobile games like Temple Run, Subway Surfer e.t.c were released around the year 2012-13 which led to the assumption that as games were more easily accessible more then than ever, the digital games era must have hurt the turnover of board game publishers.
+As one can observe the vertical line is at year 2013, after which there was a drastic drop in number of people who bought new board games or wish or want them.
+The number people owning a game peaked around year 2014 and then decreased by almost **5 times.** 
 
 # References
 
@@ -400,9 +572,6 @@ C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. 
   and Hall/CRC Florida, 2020.
 
 H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
-
-Harmon, J. (2022). Tidy Tuesday. Retrieved from 
-https://www.tidytuesday.com/
 
 Lüdecke et al., (2021). performance: An R Package for Assessment, Comparison and Testing
   of Statistical Models. Journal of Open Source Software, 6(60), 3139.
@@ -412,8 +581,6 @@ Robinson D (2022). _drlib: Personal R package of David Robinson_. R package vers
 
 Robinson D, Hayes A, Couch S (2022). _broom: Convert Statistical Objects into Tidy
   Tibbles_. R package version 1.0.0, <https://CRAN.R-project.org/package=broom>.
-
-tidytuesday/data/2022/2022-01-25 at master · rfordatascience/tidytuesday. (2022). Retrieved from https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-01-25
 
 Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A,
   Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J, Robinson D,
