@@ -7,6 +7,7 @@ Team members:
 * [Dhruv Nirmal]
 * [Gui Gao]
 * [Krisanat Anukarnsakulchularp]
+* [Alison Phan]
 
 # Steps
 
