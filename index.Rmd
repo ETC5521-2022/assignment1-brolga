@@ -1,10 +1,12 @@
 ---
-title: "ETC5521 Assignment 1"
+title: "ETC5521 Assignment 2"
 subtitle: "Board Games analysis"
-team: brolga
+team: Brolga
 author:
   - [Dhruv Nirmal]
   - [Gui Gao]
+  - [Krisanat Anukarnsakulchularp]
+  - [Alison Phan]
 date: "`r Sys.Date()`"
 output: 
   bookdown::html_document2: default
@@ -30,130 +32,31 @@ knitr::opts_chunk$set(
 
 ```{r}
 # library packages
-library(tidyverse)
-library(kableExtra)
-library(knitr)
-library(drlib)
+library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(plotly)
-library(performance)
+library(stringi)
 library(stringr)
+library(ggpubr)
+library(factoextra)
 library(broom)
-```
+library(tibble)
+library(purrr)
+theme_set(theme_minimal())
 
 
-```{r}
 # read data
 ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
 details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
 ```
 
-
 # Introduction and motivation
 
-## Introduction:
-
-The classic Board Games have been around for decades, bringing people together to enjoy the traditional game. In Greece there are many popular board game associations and 'fan clubs' which organise many tournaments and offer a wealth of prizes. 
-
-Today, although Computer Games are in a golden age of development with technological support, there are still many great board games that are released each year and attract a lot of attention.
-
-**Board Game Geek** is a specialist board game website. Users can find every board game and information about it. This information includes descriptions of the games, reviews, user ratings, professional ratings, prices, where to buy and more.
-
-
-## Motivation:
-
-My teammates and I are both interested in board games and have tried many interesting board games. This study and analysis of the huge dataset of board games can help us understand board games from a different perspective, and also help us understand the whole landscape of board games and how it has changed over time.
-
-So, we have tried to dig deeper into the data itself to show some reports and interesting data visualisations of the results.
-
-
-## Data limitations:
-
-* The original data contains about 15-19 million reviews, and the data in the dataset should be filtered to affect the results of analyzing whether the mean scores of the games conform to a normal distribution.
-
-* There will be some irregularly recorded data inside the dataset, for example, there will be games with negative time years and 0 inside **yearpulished** varieble, which may bring limitations to our analysis.
+This paper seeks to explore the evolution of the game’s popularity. We will be using two datasets on games from R for Data Science/ tidytuesday which is a weekly data project in R from Kaggle’s Board Games Geek that is contributed by David Baranger and Georgios Karamanis. A game is often played as a social form of entertainment. Gaming is considered the world’s favourite form of entertainment where the gaming industry has generated more revenue than TV, movies, and music (OppenheimerFunds, 2018).  Not only do they transport us to new realities to satisfy our needs for recognition and achievements, but they also keep us interested and engaged due to their attention to detail (Barone, 2022). Over the years as the gaming industry is booming (Read, 2022), it is essential for gaming developers to target and identify factors that would satisfy and attract customers to buy their games. Today, with many games on the market, it has been increasingly difficult and competitive among companies as they face a new generation of buyers with different needs (Prystupa-Rządca & Starostka, 2022). As it is essential to stay on top of the latest insights from around the globe, we are motivated to investigate the factors that influence buyers’ behaviour regarding their gaming preferences and purchases to assist companies in improving their future game products and profitability. We aim to understand factors that affect and influences buyers psychologically.
 
 
 # Data description
 
-## Source of the data
-
-Our data comes from *Kaggle* by way of **Board Games Geek**, with a hattip to *David and Georgios*. 
-We could find the data via the following website:
-https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-01-25
-
-
-## The structure of the data
-
-We have two initial datasets, **ratings** and **details**. The initial size of the ratings dataset is around 4.8MB and contains 21631 observations and 10 columns. The original size of the details dataset is approximately 32.7MB, with 21831 observations and 23 columns.
-
-* About **ratings** dataset:
-[This dataset](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv) contains information about the average rating , rank and theoretical rating average (bayes average). Every game's url and thumbnail link is also provided. It was collected over a time period of 100 AD to 2022.
-
-
-```{r}
-# read ratings data structure csv
-ratings_structure <- read_csv("ratings.csv")
-```
-
-
-```{r}
-tibble(
-  "variable" = c("id", "name", "average"),
-  "class" = c("double", "character", "double"),
-  "description" = c("Game ID", "Game name", "Average rating on Board Games Geek (1-10)")
-) %>%
-  kable() %>%
-  kable_styling(full_width = F,
-                bootstrap_options = c("striped", "condensed", "bordered"))
-```
-
-* About **details** dataset observations:
-[The details](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv) dataset provides information about the type of board game, game mechanics, who was the artist, creator and publisher of the game. It provides an extensive detail about the game such as min and max player who can play the game, minimum age, how the game is played and also put each game in categories such as building, dice, drinking e.t.c. The data collected is over a time period of 400 
-AD to 2023.
-
-
-```{r}
-# read details data structure csv
-details_structure <- read_csv("details.csv")
-```
-
-
-```{r}
-tibble(
-  "variable" = c("id", "yearpublished", "minplayers", "maxplayers", "playingtime", 
-                  "boardgamemechanic", "owned", "trading", "wanting", "wishing"),
-  "class" = c("double", "double", "double", "double", "double", 
-              "character", "double", "double", "double", "double"),
-  "dsecription" = c("Game ID", 
-                    "Year game was published", 
-                    "Game mechanic - how to play the game (separated by comma)",
-                    "Minimum number of players required to play",
-                    "Maximum number of players required to play",
-                    "Average playing time of a game",
-                    "People who own a game",
-                    "People who trade a game",
-                    "People who want to own a game",
-                    "People who wish to own a game")
-) %>%
-  kable() %>%
-  kable_styling(full_width = F,
-                bootstrap_options = c("striped", "condensed", "bordered"))
-```
-
-
-## Data Wrangling
-
-* filter rows: We have about 30 non-repeating variables in our datasets, so we use the **select** function to filter out the variables we want to use before analyzing the questions
-
-* join: Our data comes from two datasets, but they have some same variables, so we use the **join** function to merge them together for analysis
-
-* separate rows: A board game may have multiple game mechanics, and I use **separate_rows** function that splits each game mechanic by comma and then calculates
-
-* remove NA rows: Among the variables we select, there are some **NA** values that affect our plotting results, therefore, I use **na.omit** function to delete NA rows
-
-* remove special characters: I split the game mechanics, but there arre special symbols inside the strings, so I use **gsub** function to delete all the special symbols
 
 
 # Questions of interest
@@ -170,7 +73,7 @@ Q3.
 Trends in board game publication rates over time.
 
 Q4.
-**What are the common game mechanics and their changes in prevalent?**
+What are the common game mechanics and their changes in prevalent?
 
 Q5.
 What types of games are becoming increasingly popular?
@@ -179,7 +82,7 @@ Q6.
 How many games have each listed how many mechanics?
 
 Q7.
-**What is the distribution of ratings for the board games?**
+What is the distribution of ratings for the board games?
 
 Q8.
 Is there a linear relationship between the year of release of a game and the average rating it receives?
@@ -191,8 +94,8 @@ Q10.
 What are the 10 most common words used in board game descriptions?
 
 Q11. 
-**Is there any relationship between average game time and ownership, min/max 
-players?**
+Is there any relationship between average game time and ownership, min/max 
+players?
 
 Q12. 
 How does number of people who wish to own the game and who own the game plot 
@@ -210,7 +113,7 @@ Q15.
 Are people intrigued by a particular game designer?
 
 Q16. 
-**How did the era of electronic games(starting from 2010-11) affect the number of people who want/wish/own board games?** 
+How did the era of electronic games(starting from 2010-11) affect the number of people who want/wish/own board games?
 
 Q17. 
 Is it right to assume that a game board publisher publishes a single type of 
@@ -225,393 +128,439 @@ How accurate has bayes average been?
 Q20. 
 Which era or decade played a big role in people playing more board games?
 
+**Q21. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  Is this statement true and why is it the case?**
+
+**Q22.The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games.**
+
+**Q23.
+
+
+**Q24.
+
+
+
+
+
 
 ## Interested Questions
 
-Q1.
-What are the common game mechanics and their changes in prevalent?
+Q1. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  Is this statement true and why is it the case?
 
-Q2.
-What is the distribution of ratings for the board games?
+Q2.The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games.
 
 Q3.
-Is there any relationship between average playing time of a game and ownership(or products sold), min/max players required to play that game. 
+
 
 Q4.
-How did the era of electronic games(starting from 2010-11) affect the number of people who want/wish/own board games? 
+
 
 
 # Expected findings
 
-Q1.
-The most common game mechanics maybe the 'Acting', 'Dice Rolling' and 'Hand Management'. I guess many game mechanics will become more popular.
+**Q1. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  Is this statement true and why is it the case?**
 
-Q2.
-I guess the ratings for the games follow a normal distribution.
+The statement “Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play” may be true as consumers tend to buy fewer games compared to past decades, however, they are spending more time with those games indicating that games were more in higher demand back in the days (Brambilla Hall, 2022). The other statement “Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play”, may be true as colour and lines have been known to create human wants and desire (Zeller, 2022).
 
-Q3.
-More average play might mean less owners, as people might not want to invest too much time in a game, but it might be popular among bigger groups as board games keep a group engaged. But as the required number of players increase, the number of products sold should drop.
+**Q2. The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games.**
 
-Q4.
-The demand of board games should be lower after the start of electronic games 
-era.
+Studies have shown that games exploded in popularity when consumers tried to keep themselves entertained while being forced to stay at home (Epstein, 2022). As games are often considered a form of entertainment and an escape from boredom, during periods such as Covid-19 during lockdowns, there would be an increase in game ownership.
 
+**Q3.
+
+**Q4.
 
 # Analysis and findings
 
-## Q1. What are the common game mechanics and their changes in prevalent?
+**Q1. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  Are these statements true and why is it the case?**
 
-### Data Wrangling
-
+Pre-processing step:
 ```{r}
-q1_ratings <- ratings %>%
-  select(id, name)
-q1_details <- details %>%
-  select(id, yearpublished, boardgamemechanic)
+detailsv2=details %>% filter(yearpublished!=0)
 
-Q1_data <- q1_ratings %>%
-  inner_join(q1_details,
-             by = "id")
+## create additional column that is based on world event (source: https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-since-1920/113604790/)
 
-Q1_data$boardgamemechanic <- gsub('[[]', '', Q1_data$boardgamemechanic)
-Q1_data$boardgamemechanic <- gsub('[]]', '', Q1_data$boardgamemechanic)
 
-Q1_data <- Q1_data %>%
-  separate_rows(boardgamemechanic, sep = ",") %>%
-  arrange(id)
+detailsv2 = detailsv2 %>% mutate(world_year = case_when(
+  (yearpublished <1914)~ "1. Before First World War",
+  (yearpublished >= 1914) & (yearpublished <1919)~ "2. During First World War",
+  (yearpublished >= 1919) & (yearpublished <1939)~ "3. Before Second World War",
+  (yearpublished >= 1939) & (yearpublished <1946)~ "4. During Second World War",
+  (yearpublished >= 1946) & (yearpublished <1965)~ "5. Baby Boomer",
+  (yearpublished >= 1965) & (yearpublished <1983)~ "6. Before Internet",
+  (yearpublished >= 1983) & (yearpublished <1993)~ "7. Internet Born",
+  (yearpublished >= 1993) & (yearpublished <2008)~ "8. Amazon, Google and Touchscreen Mobile Born",
+  (yearpublished >= 2008) & (yearpublished <2009)~ "9. Global Financial Crisis",
+  (yearpublished >= 2009) & (yearpublished <2020)~ "10. Post Global Financial Crisis",
+  (yearpublished >= 2020) & (yearpublished <2022)~ "11. During COVID",
+  (yearpublished >= 2022) ~ "12. Post COVID",
+  
+))
 
-Q1_data$boardgamemechanic <- gsub("'", '', Q1_data$boardgamemechanic)
-Q1_data$boardgamemechanic <- str_trim(Q1_data$boardgamemechanic)
-Q1_data$boardgamemechanic <- gsub('"', '', Q1_data$boardgamemechanic)
+detailsv2$world_year = as.factor(detailsv2$world_year)
+
+levels(detailsv2$world_year) =  c("1. Before First World War",
+                                     "2. During First World War",
+                                     "3. Before Second World War",
+                                     "4. During Second World War",
+                                     "5. Baby Boomer",
+                                     "6. Before Internet",
+                                     "7. Internet Born",
+                                     "8. Amazon, Google and Touchscreen Mobile Born",
+                                     "9. Global Financial Crisis",
+                                     "10. Post Global Financial Crisis",
+                                     "11. During COVID",
+                                     "12. Post COVID")
 ```
 
 
-### Analysis
+```{r echo=FALSE}
+#### Part 1. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. 
 
-```{r, table1, }
-Table1 = Q1_data %>%
-  count(boardgamemechanic, sort = TRUE) %>%
-  top_n(10)
-knitr::kable(Table1, booktabs = TRUE, "html",
-             caption = "The Most Common Game Mechanics") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "hold_position"), 
-                full_width = F,
-                font_size = 14)
+d1 = detailsv2 %>% select(id, yearpublished, owned, trading, wanting, wishing, world_year)
+d2 = ratings %>% select(id, bayes_average)
+q1 = merge(d1, d2, by="id") ## joined data for analysis later
+
+
+summary(q1$yearpublished)
+q1 %>% group_by(world_year) %>% tally()
+
+q1 %>% 
+  filter((yearpublished>=1914) & (yearpublished <2023)) %>%
+ggplot( aes(bayes_average)) +
+  geom_histogram(alpha = 0.8)
+
+q1 %>% 
+  group_by(yearpublished) %>%
+  
+  filter((yearpublished>=1914) & (yearpublished <2023)) %>%
+  
+  summarise(mean_bayes_average = mean(bayes_average)) %>%
+
+  ggplot(aes(x=yearpublished , y=mean_bayes_average)) + 
+  geom_point() + 
+  geom_line() + 
+  geom_smooth() +
+  labs(title = "Yearly mean_bayes_average",
+       y = "Yearly mean_bayes_average",
+       x = "Year") 
+
+
+q1 %>%
+  ggplot(aes(x=wanting , y= wishing )) + 
+  geom_point() 
+
+
+q1 %>% # select(-bayes_average) %>% 
+  filter((yearpublished>=1914) & (yearpublished <2022)) %>%
+  group_by(id) %>%
+  mutate( wanting_wishing = wanting + wishing,
+          rating = ifelse(bayes_average < mean(ratings$bayes_average), "Below Average", "Above Average")) %>%
+  select(-c("wishing", "wanting","bayes_average")) %>%
+  gather(key,value,-c(id,yearpublished,world_year,rating))%>%
+  arrange(id) %>%
+ mutate(percent = prop.table(value)) %>%
+  ggplot(aes(x=yearpublished, y =percent)) + geom_jitter(alpha = 0.01) + 
+  geom_smooth() + facet_grid(key ~ rating) + theme_bw()
+
+
+q1 %>% # select(-bayes_average) %>% 
+  filter((yearpublished>=2000) & (yearpublished <2022)) %>%
+  group_by(id) %>%
+  mutate( wanting_wishing = wanting + wishing,
+          rating = ifelse(bayes_average < mean(ratings$bayes_average), "Below Average", "Above Average")) %>%
+  select(-c("wishing", "wanting","bayes_average")) %>%
+  gather(key,value,-c(id,yearpublished,world_year,rating))%>%
+  arrange(id) %>%
+  mutate(percent = prop.table(value)) %>%
+  ggplot(aes(x=yearpublished, y =percent)) + geom_jitter(alpha = 0.01) + 
+  geom_smooth() + facet_grid(key ~ rating) + theme_bw()
+
+
+
+##### Part2.  Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  
+
+
+d1 = detailsv2 %>% select(id, yearpublished, owned, trading, wanting, wishing, boardgameartist, boardgamedesigner)
+d2 = ratings %>% select(id, bayes_average,rank)
+q1 = merge(d1, d2, by="id") ## joined data for analysis later
+
+q2 = q1 %>%
+  mutate(boardgameartist = stri_replace_all_regex(boardgameartist,
+                             pattern=c('\\[', '\\]', "\\'",'\\"', '\\\\'),
+                             replacement=c('', '', '','',''),
+                             vectorize=FALSE))
+q2$cnt<-unlist(lapply(str_split(q2$boardgameartist, ","), length))
+
+#  filter to select only those games that have single artist
+single_artist <- q2 %>% 
+  filter(cnt==1)
+
+glimpse(unique(single_artist$boardgameartist))
+
+
+top_boardgameartist <-single_artist %>% 
+  filter((!is.na(boardgameartist) ), (boardgameartist != "(Uncredited)")) %>% 
+  group_by(boardgameartist) %>% 
+  tally() %>% 
+  top_n(70, n) %>% 
+  arrange(desc(n))
+
+top_boardgameartist
+
+games_df<- q2 %>% filter(boardgameartist %in% top_boardgameartist$boardgameartist)
+games_df2 = games_df %>% group_by(boardgameartist) %>%
+  summarise(mean_owned=mean(owned),
+            mean_bayes_average=mean(bayes_average )) 
+games_df2 %>%
+  ggplot(aes(x=mean_owned,y=mean_bayes_average,label=boardgameartist)) + geom_point() + geom_text() + theme_bw()
+
+
+set.seed(123)
+res.km <- kmeans(scale(games_df2[,-1]),3 , nstart = 25)
+# Dimension reduction using PCA
+res.pca <- prcomp(games_df2[, -1],  scale = TRUE)
+# Coordinates of individuals
+ind.coord <- as.data.frame(get_pca_ind(res.pca)$coord)
+# Add clusters obtained using the K-means algorithm
+ind.coord$cluster <- factor(res.km$cluster)
+# Add Species groups from the original data set
+ind.coord$boardgameartist <- games_df2$boardgameartist
+# Data inspection
+head(ind.coord)
+
+# Percentage of variance explained by dimensions
+eigenvalue <- round(get_eigenvalue(res.pca), 1)
+variance.percent <- eigenvalue$variance.percent
+head(eigenvalue)
+
+ggscatter(
+  ind.coord, x = "Dim.1", y = "Dim.2", 
+  color = "cluster", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  label = "boardgameartist", size = 1.5,  legend = "right", ggtheme = theme_bw(),
+  xlab = paste0("Dim 1 (", variance.percent[1], "% )" ),
+  ylab = paste0("Dim 2 (", variance.percent[2], "% )" )
+) +
+  stat_mean(aes(color = cluster), size = 4)
+
+```
 ```
 
 
-```{r, figure1}
-Q1_data %>%
-  count(boardgamemechanic, sort = TRUE) %>%
-  na.omit() %>%
-  top_n(20) %>%
-  ggplot(aes(x = reorder(boardgamemechanic, n),
-             y = n)) +
-  geom_col(fill = "#78a99c",
-           color = "#3f6b61",
-           show.legend = FALSE) +
-  coord_flip() +
-  scale_x_reordered() +
-  labs(x = "Number",
-       y = "Mechanics",
-       title = "Most Common Mechanics") +
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5)) -> p1
-ggplotly(p1)
-```
+# Pre-processing step
+- created an additional column that is based on world event (source: https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-since-1920/113604790/)
+- joined ratings and details together using 'id' as mapping key 
+- excluded years with limited data availability
+
+Due to the limited data availability, we will only be focusing from 1914 (start of World War I) to 2022.  By using the bayes average for the trend for rating, we can see that the fluctuation has decreased significantly. We can also see that “wanting” and “wishing” are positively correlated. By combining “wanting” and “wishing” together, would we be able to have a representation of the games that are in demand. Ratings that are below average 5.68 based on bayes mean is considered as a low rating game.  Despite low ratings, there is only a slight decrease in games that are owned in recent years, especially after Global Financial Crisis where it has reflected higher in demand. Games that were published earlier had slightly lower ratings however they were not in high demand. This means that our first statement where “games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play” is incorrect.
+
+For this analysis, we will be focusing only the top 70 games with a single artist. Based on the plot for “average own” and “bayes average”, we can see that games from Chris Quilliams and Miguel Coimbra have high number of owned and ratings that are higher than 6. Interestingly, although the ratings for Cyril Bouquet is below 6, the games owned is more than 6000. This could indicate that the artwork is attractive, and people own it as a collection even though it might not be interesting to play. When doing clustering analysis, we also see that the artist can be grouped into 3 clusters. With the cluster 1 (red), being high quality artwork and can be kept as collection. This means that our second statement were “Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play” is true. 
 
 
-```{r, figure2}
-Q1_data %>%
-  filter(yearpublished %in% c(1990:2002, 2010:2022)) %>%
-  mutate(year = ifelse(yearpublished <= 2002, "1990s", "2010s")) %>%
-  group_by(year, boardgamemechanic) %>%
-  summarise(count = n()) %>%
-  top_n(20) %>%
-  spread(key = year, value = count) %>%
-  na.omit() %>%
-  ggplot() +
-  geom_point(aes(x = `1990s`,
-                 y = reorder(boardgamemechanic, `2010s` - `1990s`)), 
-             color = "#Aa3428") +
-  geom_point(aes(x = `2010s`,
-                 y = boardgamemechanic), 
-             color = "#609c6c",
-             size = 3) +
-  geom_segment(aes(x = `1990s`, 
-                   xend = `2010s`,
-                   y = boardgamemechanic, 
-                   yend = boardgamemechanic)) +
-  theme_minimal() +
-  labs(x = "Number",
-       y = "Mechanics", 
-       title = "Most Prevalent Mechanics in the 1990s and 2010s") -> p2
-ggplotly(p2)
-```
+**Q2.  The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games?**
+
+```{r echo=FALSE}
+
+d1 = detailsv2 %>% mutate( popularity=  (wanting+wishing) / owned )
+d2 = ratings %>% select(id, bayes_average)
+q1 = merge(d1, d2, by="id") ## joined data for analysis later
+
+summary(q1$popularity)
+q1 %>% filter(popularity > 1)
+q1 %>% 
+  ggplot(aes(x=bayes_average, y = popularity))+ geom_point() + facet_wrap(world_year~. )  
 
 
-## Q1 Conclusion
-
-* According to above table and column plot, we can find that the most common game mechanic is **Dice Rolling**, unsurprisingly. This is because **Dice Rolling** itself is a mechanic that can be used in many games. It has been around for a long time, and ancient peoples could make simple dice out of stones, clay, bones, etc. to play the game, so **Dice Rolling** is often seen as the most dominant symbol of board games (Sofiia & Joseph Alexander, 2017).
-
-* Before I analyzed this question, I made an inference based on the actual situation of family and friends in my life -- the most common board game mechanics will become more and more popular. With lollipop plot above, we can see that the top 20 most common game mechanics have become more and more popular over the past few decades. This is consistent with my previous assumptions. 
-
-* This is because modern board games are starting to include more mechanics, and the variety of games is becoming richer over time, so board games as a whole can also appeal to a wider audience. Another very important reason is that we now have a better standard of living and more free time, and the increase in leisure time is an obvious driver of demand for entertainment products such as board games.
+q1 %>% 
+  filter(world_year != "4. During Second World War") %>%
+  ggplot(aes(x=bayes_average, y = popularity))+ geom_point() + facet_wrap(world_year~. )  
 
 
-## Q2. What is the distribution of ratings for the board games?
 
-### Data Wrangling
+  
+q2 = q1 %>%
+  mutate(boardgamecategory = stri_replace_all_regex(boardgamecategory,
+                             pattern=c('\\[', '\\]', "\\'",'\\"', '\\\\'),
+                             replacement=c('', '', '','',''),
+                             vectorize=FALSE))
+q2$cnt<-unlist(lapply(str_split(q2$boardgamecategory, ","), length))
 
-```{r}
-q2_ratings <- ratings %>%
-  select(id, name, average)
-q2_details <- details %>%
-  select(id,yearpublished)
+single_cat<-q2 %>% 
+  filter(cnt==1)
 
-Q2_data <- q2_ratings %>%
-  inner_join(q2_details,
-             by = "id")
-```
+top_10 = single_cat  %>% 
+  filter(!is.na(boardgamecategory)) %>% 
+  group_by(boardgamecategory) %>% 
+  tally() %>% 
+ top_n(10, n) 
 
+q2 = single_cat %>% 
+  filter(boardgamecategory %in% top_10$boardgamecategory) 
 
-### Analysis
-
-```{r, figure3}
-# plot
-Q2_data %>%
-  filter(yearpublished >= 1990) %>%
-  ggplot(aes(x = average,
-             y = ..density..)) +
-  geom_histogram(fill = "#78a99c", 
-                 color = "#3f6b61", 
-                 alpha = 0.9) +
-  geom_density(color = "#Aa3428") +
-  labs(x = "Average Rating",
-       y = "Density",
-       title = "Distribution of Average Ratings") +
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5)) -> p3
-ggplotly(p3)
-```
+q2 %>% 
+  group_by(boardgamecategory,world_year) %>% 
+  tally() %>% 
+ # top_n(30, n) %>% 
+  arrange(desc(n)) %>%
+  ggplot(aes(x= reorder(boardgamecategory, n), y=n)) + 
+  geom_bar(stat="identity", fill="#f68060", alpha=.6, width=.4) +
+    coord_flip() +
+    xlab("") +
+    theme_bw() +  facet_wrap(world_year~. ) 
 
 
-```{r, table2}
-# ks.test
-ks.test <- ks.test(x = Q2_data$average, 'pnorm', 
-                   mean = mean(Q2_data$average), 
-                   sd = sd(Q2_data$average))
-Table2 = tidy(ks.test)
-knitr::kable(Table2, booktabs = TRUE, "html",
-             caption = "Boardgame Ratings ks.test",
-             digits = 10) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "hold_position"), 
-                full_width = F)
-```
+
+q2 %>% 
+  filter(! world_year %in%   c("4. During Second World War", "5. Baby Boomer", "6. Before Internet", "5. Baby Boomer")) %>%
+  group_by(world_year) %>% 
+  summarize(t_test = list(t.test(popularity))) %>% 
+  mutate(tidied = map(t_test, broom::tidy)) %>%
+  unnest(tidied) %>% 
+  ggplot() + 
+  geom_errorbarh(aes(xmin = conf.low,
+                    xmax = conf.high,
+                    y = world_year))
 
 
-## Q2 Conclusion
 
-* From the above table output we can see that the test statistic is 0.021989, corresponding to a p-value of 1.647e-09. Since the p-value is less than 0.05, we reject the original hypothesis. We have sufficient evidence that the board game ratings for this sample data are not from a normal distribution.
+reg = q2 %>%
+  filter(! world_year %in%   c("4. During Second World War", "5. Baby Boomer", "6. Before Internet", "5. Baby Boomer")) %>%
+  group_by(world_year, boardgamecategory) %>%
+  nest() %>% 
+  mutate(
+    fit = map(data, ~ lm(popularity ~ trading+bayes_average+ minplayers + maxplayers + playingtime+ minplaytime + maxplaytime + minage , data = .x)),
+    tidied = map(fit, tidy),
+    glanced = map(fit, glance),
+    augmented = map(fit, augment)) %>%
+  mutate(
+    rsq = glanced %>% map_dbl("r.squared"),
+  ) 
 
 
-## Q3 Is there any relationship between average playing time of a game and ownership, min/max players required to play that game. 
 
-### Data preparation
 
-* Selecting variables needed for the analysis from both datasets and the joining(using inner_join) them to make the data tidy.
+reg %>% 
+  unnest(tidied) %>% 
+  select(world_year,boardgamecategory, term, estimate, rsq) %>% 
+  spread(term, estimate) %>% 
+  ggplot(aes(`(Intercept)`, minage)) +
+  geom_point(aes(colour = world_year, size = rsq)) +
+  geom_smooth(se = FALSE) +
+  scale_size_area() +
+  theme_minimal()
 
-```{r}
-q3_ratings <- ratings %>%
-  select(id, name)
 
-q3_details <- details %>%
-  select(id, minplayers, maxplayers, playingtime, owned)
 
-Q3_dataset <- q3_ratings %>%
-  inner_join(q3_details,
-             by = "id")  
-```
+reg %>% 
+  unnest(tidied) %>% 
+  select(world_year,boardgamecategory, term, estimate, rsq) %>% 
+  spread(term, estimate) %>% 
+  ggplot(aes(`(Intercept)`, playingtime)) +
+  geom_point(aes(colour = world_year, size = rsq)) +
+  geom_smooth(se = FALSE) +
+  scale_size_area() +
+  theme_minimal()
 
-### Analysis
 
-* Plotting total number of owners of a game against their owned game average playing time, after filtering playing time less than 500 min to get the if there is any correlation.  
 
-```{r plot-a, fig.cap = "Relationship between average game time and games owned"}
+reg %>% 
+  unnest(tidied) %>% 
+  select(world_year,boardgamecategory, term, estimate, rsq) %>% 
+  spread(term, estimate) %>% 
+  ggplot(aes(`(Intercept)`, maxplayers)) +
+  geom_point(aes(colour = world_year, size = rsq)) +
+  geom_smooth(se = FALSE) +
+  scale_size_area() +
+  theme_minimal()
 
-plot <- Q3_dataset %>%
-  filter(playingtime <= 500)%>%
-  na.omit() %>%
-  ggplot(
-       aes(x = playingtime,
-           y = owned)) +
-  geom_line(color = "#F6370F") +
-  xlab("Average playing time of a game") +
-  ylab("Number of people who own the game") +
-  labs(title = "Number of people who own the game Vs Average playing time") +
-  labs(colour = "Current status of people") +
-  theme_classic() +
-  theme(plot.title = element_text(hjust = 0.5),
-        text = element_text(size = 10)) 
 
-ggplotly(plot)
-```
 
-* Checking linear model co-efficients to confirm my observation.
 
-```{r}
-lm(owned ~ playingtime, Q3_dataset)
-```
 
-* Plotting for different number of minimum players for a game to see, if a game requires more number of people, it has more playing time which in turn means less sold products.  
+## residual
+reg %>% 
+  unnest(augmented) %>% 
+  ggplot(aes(bayes_average, .resid)) +
+  geom_line(aes(group = boardgamecategory), alpha = 0.3) +
+  geom_hline(yintercept = 0, colour = "red", size = 1) +
+  geom_smooth(se = FALSE, size = 1.5) +
+  facet_wrap( ~ world_year) +
+  theme_minimal()
 
-```{r plot-b, fig.cap = "Relationship between average game time and games owned faceted for diiferent minimum players required"}
 
-Q3_dataset %>%
-  filter(playingtime <= 250) %>%
-  na.omit() %>% 
-  group_by(minplayers, playingtime) %>%
-  summarise(sum = sum(owned)) %>% 
-  ggplot(
-       aes(x = playingtime,
-           y = sum)) +
-  geom_bar(stat = "identity",
-           color = "#F6370F") +
-  facet_wrap(~minplayers,
-             scales = "free")+
-  xlab("Average playing time of a game") +
-  ylab("Number of people who own the game") +
-  labs(title = "Number of players required to play a game for average playing time") +
-  labs(colour = "Current status of people") +
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5),
-        text = element_text(size = 10)) 
+
+
 
 ```
 
+For this analysis, we have defined popularity by summing the “wanting” and “wishing” and then dividing it by the “owned” to get an indication of the board game popularity. Games during World War II is excluded in our analysis as they are outliers. Based on our observation, interestingly during World War I, before World War II and during Covid-19, board games have gained popularity. Limit to single category game type, card game and abstract strategy are the top two most popular game categories. Intriguingly, during the global financial crisis and post-global financial crisis, abstract strategy type game is more popular compared to the card game, even though card game is usually the most popular regardless of the period.  
 
-```{r tab}
+Due to the limited data in certain periods, we have removed games published in periods during World War II, Baby Boomer and Before the Internet when performing a one-sided t-test to understand if the popularity is statistically significant. The result showed that all periods are significant, except the period when the Internet was born.
 
-t <- Q3_dataset %>%
-  filter(playingtime <= 250) %>% 
-  group_by(minplayers) %>%
-  summarise(sum = sum(owned))
-
-knitr::kable(t, caption = "Minimum number of people required to play a game Vs games sold in that age category") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "hold_position"), 
-                full_width = T)
-```
+Multiple linear regressions were fitted to the data for different periods. Based on the residuals, the models did not fit well with the games published during World War I, before World War II and during Covid-19. This suggests that when the world is not at peace, the board game's popularity could fluctuate a lot. “Playing time” and “maxplayers” both seem to be important factors that have contributed to the game’s popularity in recent few years (i.e. Post Covid-19). In contrast, “minage” does not seem to be relevant to popularity.
 
 
-## Q3 Conclusion
+## Data limitations:
 
-* According to the plot in figure \@ref(fig:plot-a) one can clearly observe that if the average playing time of board games **increases**, the number of people who own that game **decreases**. My reason to assume the same was, games which require a lot of time to finish, might be a less popular option for people as a result of lack of time.
-
-* To verify my result, I fitted a linear model for the variables and found out the slope was negative.
-
-* A game with more playing time might sell less products but it can be the popular with people who play games in big groups. I expected, as the number of people required to play a game increases, the game's selling numbers should drop. See Figure \@ref(fig:plot-b), one can observe as the required players to play a game **increases**, the number of products sold decreased drastically (See also \@ref(tab:tab) ) as smaller groups of people can more often indulge in board games.
+* Missing information, so we needed to remove it.
+* Insufficient data so we removed it to avoid misleading information.
 
 
-## Q4 How did the era of electronic games(starting from 2012-13) affect the number of people who want/wish/own board games? 
 
-### Data preparation
 
-* Selecting variables needed for the analysis from both datasets and the joining them to make the data tidy. Pivoting data to get a better perspective to understand data. 
 
-```{r}
-
-q4_ratings <- ratings %>%
-  select(id, name)
-
-q4_details <- details %>%
-  select(id, yearpublished, trading, wanting, owned, wishing)
-
-Q4_dataset <- q4_ratings %>%
-  inner_join(q4_details,
-             by = "id")  
-
-Q4 <- Q4_dataset %>%
-  pivot_longer(!c(id, name, yearpublished),
-               names_to = "status",
-               values_to = "number_of _people")
-
-```
-
-### Data Analysis
-
-* Plotting graph to see if along the years board games sold, or number of people  wishing/wanting to own game have dropped or not.  
-
-```{r, plot3}
-
-plot1 <- Q4 %>%
-  filter(yearpublished >= 1990) %>%
-  group_by(status, yearpublished) %>%
-  summarise(mum_of_people = sum(`number_of _people`)) %>%
-  ggplot(aes(x = yearpublished,
-             y = mum_of_people,
-             colour = status)) +
-    geom_line() +
-  geom_vline(xintercept = 2013) +
-  xlab("Gmaes published in the given year") +
-  ylab("Number of people") +
-  labs(title = "Games sold over the years") +
-  labs(colour = "Current status of people") +
-  theme_classic() +
-  theme(plot.title = element_text(hjust = 0.5),
-        text = element_text(size = 8))  
-
-ggplotly(plot1)  
-```
-
-## Q4 Conclusion
-
-* There is now almost no market for new casual board games, and even the classics sell only a fraction of their annual sales just a few years ago. the advent of apps had a much more profound effect, absolutely devastating sales of casual board games but paradoxically increasing interest in German-style games.
-
-* Many popular  mobile games like Temple Run, Subway Surfer e.t.c were released around the year 2012-13 which led to the assumption that as games were more easily accessible more then than ever, the digital games era must have hurt the turnover of board game publishers.
-
-* As one can observe the vertical line is at year 2013, after which there was a drastic drop in number of people who bought new board games or wish or want them.
-The number people owning a game peaked around year 2014 and then decreased by almost **5 times.** 
 
 
 # Conclusion
 
-The top 20 most common game mechanics have become more and more popular over the past few decades. The most common game mechanic being **Dice Rolling**. This was achieved by doing some text analysis of the selected columns, taking the help of functions like **seperate_row, gsub.** Plotting histogram and performing **KS-test statistic** on ratings of board games, helped us came to a conclusion that the board games rating from this data set does not follow normal distribution. The average playing time of a board game and minimum number of players required to play a game is **inversely proportional** to the number of games sold. We took a look at the linear model coefficients to confirm our assumption and observation.  
-Data pivoting enabled us to rearrange the columns and rows in a report so we can view data from different perspectives. The era of mobile games affected people's interest in board games negatively as after year 2012-13 the number of games owned/want/wish/trade dropped drastically.
 
 
 # References
 
-C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman
-  and Hall/CRC Florida, 2020.
+Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based Publication Ready Plots. R package version 0.4.0. https://CRAN.R-project.org/package=ggpubr
+
+Alboukadel Kassambara and Fabian Mundt (2020). factoextra: Extract and Visualize the Results of Multivariate Data Analyses. R package version 1.0.7. https://CRAN.R-project.org/package=factoextra
+
+Barone, R. (2022). Video games are fun. Here's why, and how they hook us. https://www.idtech.com/blog/what-makes-video-games-fun#:~:text=Why%20are%20video%20games%20fun,to%20their%20attention%20to%20detail.
+
+Brambilla Hall, S. (2022). COVID-19 is taking gaming and esports to the next level. World Economic Forum. https://www.weforum.org/agenda/2020/05/covid-19-taking-gaming-and-esports-next-level/.
+
+David Robinson, Alex Hayes and Simon Couch (2022). broom: Convert Statistical Objects into Tidy Tibbles. R package version 0.7.12. https://CRAN.R-project.org/package=broom
+
+Epstein, A. (2022). Game on: How COVID-19 became the perfect match for gamers. World Economic Forum. https://www.weforum.org/agenda/2020/09/covid19-coronavirus-pandemic-video-games-entertainment-media/.
+
+Gagolewski M (2021). _stringi: Fast and portable character string processing in R_. R package version 1.7.6, <URL: https://stringi.gagolewski.com/>.
+
+Gagolewski M (2021). “stringi: Fast and portable character string processing in R.” _Journal of Statistical Software_. to appear.
 
 H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
 
-Lüdecke et al., (2021). performance: An R Package for Assessment, Comparison and Testing
-  of Statistical Models. Journal of Open Source Software, 6(60), 3139.
-  https://doi.org/10.21105/joss.03139
+Hadley Wickham (2019). stringr: Simple, Consistent Wrappers for Common String Operations. R package version 1.4.0. https://CRAN.R-project.org/package=stringr
 
-Robinson D (2022). _drlib: Personal R package of David Robinson_. R package version 0.1.1.
+Hadley Wickham and Maximilian Girlich (2022). tidyr: Tidy Messy Data. R package version 1.2.0. https://CRAN.R-project.org/package=tidyr
 
-Robinson D, Hayes A, Couch S (2022). _broom: Convert Statistical Objects into Tidy
-  Tibbles_. R package version 1.0.0, <https://CRAN.R-project.org/package=broom>.
+Hadley Wickham, Romain François, Lionel Henry and Kirill Müller (2022). dplyr: A Grammar of Data Manipulation. R package version 1.0.8. https://CRAN.R-project.org/package=dplyr
+https://www.weforum.org/agenda/2022/07/gaming-pandemic-lockdowns-pwc-growth/#:~:text=The%20video%20game%20sector%20is,exceed%20%24320%20billion%20by%202026.
+https://zellerhausart.com/blog/how-artwork-influences-purchase-decisions.
 
-Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A,
-  Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J, Robinson D,
-  Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H (2019). “Welcome to
-  the tidyverse.” _Journal of Open Source Software_, *4*(43), 1686. doi:10.21105/joss.01686
-  <https://doi.org/10.21105/joss.01686>.
-  
-Wickham H, Girlich M (2022). _tidyr: Tidy Messy Data_. R package version 1.2.0,
-  <https://CRAN.R-project.org/package=tidyr>.
-  
-Wickham H (2022). _stringr: Simple, Consistent Wrappers for Common String Operations_. R
-  package version 1.4.1, <https://CRAN.R-project.org/package=stringr>.
+Kirill Müller and Hadley Wickham (2021). tibble: Simple Data Frames. R package version 3.1.6. https://CRAN.R-project.org/package=tibble
 
-Yermolaieva S, Brown JA (2017). Dice design deserves discourse. _Game & Puzzle Design_, 3(2), 64-70.
+Lionel Henry and Hadley Wickham (2020). purrr: Functional Programming Tools. R package version 0.3.4. https://CRAN.R-project.org/package=purrr
 
-Yihui Xie (2022). knitr: A General-Purpose Package for Dynamic Report Generation in R. R
-  package version 1.39.
+OppenheimerFunds (2018). Investing in the Soaring Popularity of Gaming. https://www.reuters.com/article/sponsored/popularity-of-gaming.
 
-Zhu H (2021). _kableExtra: Construct Complex Table with 'kable' and Pipe Syntax_. R
-  package version 1.3.4, <https://CRAN.R-project.org/package=kableExtra>.
+Prystupa-Rządca, K., & Starostka, J. (2022). Customer Involvement in the Game Development Process. https://jemi.edu.pl/vol-11-issue-3-2015/customer-involvement-in-the-game-development-process.
+
+Read, S. (2022). Gaming is booming and is expected to keep growing.
+
+Young, A., & Harrington, J. (2022). World history: These are among the most important global events to happen annually since 1920. https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-since-1920/113604790/
+
+Zeller, P. (2022). How Artwork Influences Purchase Decisions.
+
+
+
+
+
+
+
+
 
