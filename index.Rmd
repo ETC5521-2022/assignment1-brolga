@@ -32,22 +32,18 @@ knitr::opts_chunk$set(
 
 ```{r}
 # library packages
-library(dplyr)
-library(tidyr)
-library(ggplot2)
+library(tidyverse)
 library(stringi)
-library(stringr)
 library(ggpubr)
 library(factoextra)
 library(broom)
-library(tibble)
-library(purrr)
+library(visdat)
+library(knitr)
+library(plotly)
+library(patchwork)
+library(kableExtra)
+
 theme_set(theme_minimal())
-
-
-# read data
-ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
-details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
 ```
 
 # Introduction and motivation
@@ -57,7 +53,64 @@ This paper seeks to explore the evolution of the game’s popularity. We will be
 
 # Data description
 
+# Data Description
 
+The Board Games data set come from [Kaggle](https://www.kaggle.com/jvanelteren/boardgamegeek-reviews/version/3?select=2022-01-08.csv) by way of [Board Games Geek](https://www.boardgamegeek.com/), with a hattip to [David and Georgios ](https://github.com/rfordatascience/tidytuesday/issues/382#issuecomment-1020305849).
+
+This has a total of two data sets, **ratings** and **details**. The ratings data set size is around 4.8MB, contains 21,631 observations and 10 columns. The details data set size is approximately 32.7MB, contains 21,831 observations and 23 columns.
+
+The [ratings](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv) data set contains information about the game, average rating , rank and theoretical rating average (bayes average). Every game's url and thumbnail link is also provided. It was collected over a time period of 100 AD to 2022.
+
+|variable      |class     |description |
+|:-------------|:---------|:-----------|
+|num           |double    | Game number |
+|id            |double    | Game ID |
+|name          |character | Game name |
+|year          |double    | Game year |
+|rank          |double    | Game rank |
+|average       |double    | Average rating  |
+|bayes_average |double    | Bayes average rating|
+|users_rated   |double    | Users rated |
+|url           |character | Game url |
+|thumbnail     |character | Game thumbnail  |
+
+The [details](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv) data set provides information about the type of board game, game mechanics, who was the artist, creator and publisher of the game. It provides an extensive detail about the game such as min and max player who can play the game, minimum age, how the game is played and also put each game in categories such as building, dice, drinking e.t.c. The data collected is over a time period of 400 AD to 2023.
+
+|variable                |class     |description |
+|:-----------------------|:---------|:-----------|
+|num                     |double    | Game number |
+|id                      |double    | Game ID |
+|primary                 |character | Primary name  |
+|description             |character | Description of game |
+|yearpublished           |double    | Year published |
+|minplayers              |double    | Min n of players|
+|maxplayers              |double    | Max n of players |
+|playingtime             |double    | Playing time in minutes |
+|minplaytime             |double    | Min play time |
+|maxplaytime             |double    | Max plat tome |
+|minage                  |double    | minimum age|
+|boardgamecategory       |character | Category |
+|boardgamemechanic       |character | Mechanic   |
+|boardgamefamily         |character | Board game family   |
+|boardgameexpansion      |character | Expansion |
+|boardgameimplementation |character | Implementation  |
+|boardgamedesigner       |character | Designer |
+|boardgameartist         |character | Artist  |
+|boardgamepublisher      |character | Publisher     |
+|owned                   |double    | Num owned  |
+|trading                 |double    | Num trading  |
+|wanting                 |double    | Num wanting |
+|wishing                 |double    | Num wishing |
+
+```{r}
+# Reading data
+ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
+details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
+
+# Check if any NAs
+vis_dat(ratings)
+vis_dat(details)
+```
 
 # Questions of interest
 
@@ -128,31 +181,28 @@ How accurate has bayes average been?
 Q20. 
 Which era or decade played a big role in people playing more board games?
 
-**Q21. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  Is this statement true and why is it the case?**
+Q21. 
+**Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  Is this statement true and why is it the case?**
 
-**Q22.The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games.**
+Q22.
+**The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games.**
 
-**Q23.
+Q23.
+**Given the number of games has been increasing, does this affect the game, e.g., rating, mechanics, playing time?**
 
-
-**Q24.
-
-
-
-
+Q24.
+**Since the computer is more accessible, people are shifting to online games. How does this affect buyer behaviour?**
 
 
 ## Interested Questions
 
 Q1. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  Is this statement true and why is it the case?
 
-Q2.The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games.
+Q2. The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games.
 
-Q3.
+Q3. Given the number of games has been increasing, does this affect the game, e.g., rating, mechanics, playing time?
 
-
-Q4.
-
+Q4. Since the computer is more accessible, people are shifting to online games. How does this affect buyer behaviour?
 
 
 # Expected findings
@@ -165,9 +215,14 @@ The statement “Games developed in the earlier years are more in demand despite
 
 Studies have shown that games exploded in popularity when consumers tried to keep themselves entertained while being forced to stay at home (Epstein, 2022). As games are often considered a form of entertainment and an escape from boredom, during periods such as Covid-19 during lockdowns, there would be an increase in game ownership.
 
-**Q3.
+**Q3. Given the number of games has been increasing, does this affect the game, e.g., rating, mechanics, playing time?**
 
-**Q4.
+For the playing time, I would expect as people have lesser leisure time, the game time should decrease to incorporate people's new lifestyles. For the rating, the average rating would be lower as there are more choice of games for people to play, which mean that there are more options for the people to compare the game. As for the game mechanics, people in different eras would have different preferred game types.
+
+**Q4. Since the computer is more accessible, people are shifting to online games. How does this affect buyer behaviour?**
+
+I would expect the number of people who owned board game to decrease around 2012 when a popular mobile game such as subway surfers, temple run was released. And in 2020, when COVID-19 hit, I expect the number of people who owned the game to decrease.
+
 
 # Analysis and findings
 
@@ -343,8 +398,6 @@ ggscatter(
   stat_mean(aes(color = cluster), size = 4)
 
 ```
-```
-
 
 # Pre-processing step
 - created an additional column that is based on world event (source: https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-since-1920/113604790/)
