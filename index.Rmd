@@ -256,8 +256,6 @@ It is expected that the number of people who owned board games would decrease ci
 
 **Q1. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people's wishes to own the game despite the game being uninteresting to play. Are these statements true and why is it the case?**
 
-Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play.
-
 ```{r, include = FALSE}
 q1_details_1 <- clean_details %>%
   select(id, yearpublished, owned, trading, wanting, wishing, world_year)
@@ -308,7 +306,7 @@ q1_dat_1 %>%
   labs(x = "Number of people wanting the game", y = "Number of people wishing the game")
 ```
 
-```{r percent-year, fig.caption = "Conditional proportion"}
+```{r percent-year, fig.cap = "Conditional proportion"}
 q1_dat_1 %>%
   filter(yearpublished >= 1914 & yearpublished < 2022) %>%
   group_by(id) %>%
@@ -340,8 +338,6 @@ q1_dat_1 %>%
   facet_grid(key ~ rating)
 ```
 
-Game artworks may influence people's wishes to own the game despite the game being uninteresting to play.
-
 ```{r}
 q1_details_2 <- clean_details %>%
   select(id, yearpublished, owned, trading, wanting, wishing, boardgameartist, boardgamedesigner)
@@ -359,8 +355,6 @@ q1_dat_2 <- q1_details_2 %>%
 
 q1_dat_2$cnt <- unlist(lapply(str_split(q1_dat_2$boardgameartist, ","), length))
 ```
-
-Now we will only select those games that have single artist:
 
 ```{r, include = FALSE}
 single_artist <- q1_dat_2 %>% 
