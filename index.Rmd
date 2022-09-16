@@ -13,7 +13,6 @@ output:
 keep_md: true
 ---
 
-
 [This assignment is for ETC5521 Assignment 1 by Team `r rmarkdown::metadata$team` comprising of `r knitr::combine_words(rmarkdown::metadata$author)`.]{style="color:#006DAE;"}
 
 
@@ -33,6 +32,7 @@ knitr::opts_chunk$set(
 ```{r}
 # library packages
 library(tidyverse)
+library(ggplot2)
 library(stringi)
 library(ggpubr)
 library(factoextra)
@@ -43,7 +43,7 @@ library(plotly)
 library(patchwork)
 library(kableExtra)
 
-theme_set(theme_minimal())
+theme_set(theme_bw())
 ```
 
 # Introduction and motivation
@@ -51,15 +51,11 @@ theme_set(theme_minimal())
 This paper seeks to explore the evolution of the game’s popularity. We will be using two datasets on games from R for Data Science/ tidytuesday which is a weekly data project in R from Kaggle’s Board Games Geek that is contributed by David Baranger and Georgios Karamanis. A game is often played as a social form of entertainment. Gaming is considered the world’s favourite form of entertainment where the gaming industry has generated more revenue than TV, movies, and music (OppenheimerFunds, 2018).  Not only do they transport us to new realities to satisfy our needs for recognition and achievements, but they also keep us interested and engaged due to their attention to detail (Barone, 2022). Over the years as the gaming industry is booming (Read, 2022), it is essential for gaming developers to target and identify factors that would satisfy and attract customers to buy their games. Today, with many games on the market, it has been increasingly difficult and competitive among companies as they face a new generation of buyers with different needs (Prystupa-Rządca & Starostka, 2022). As it is essential to stay on top of the latest insights from around the globe, we are motivated to investigate the factors that influence buyers’ behaviour regarding their gaming preferences and purchases to assist companies in improving their future game products and profitability. We aim to understand factors that affect and influences buyers psychologically.
 
 
-# Data description
-
 # Data Description
 
-The Board Games data set come from [Kaggle](https://www.kaggle.com/jvanelteren/boardgamegeek-reviews/version/3?select=2022-01-08.csv) by way of [Board Games Geek](https://www.boardgamegeek.com/), with a hattip to [David and Georgios ](https://github.com/rfordatascience/tidytuesday/issues/382#issuecomment-1020305849).
+There are two datasets: **ratings** and **details**.  The two datasets are derived from [Kaggle](https://www.kaggle.com/jvanelteren/boardgamegeek-reviews/version/3?select=2022-01-08.csv) by way of [Board Games Geek](https://www.boardgamegeek.com/), with a hattip to [David and Georgios ](https://github.com/rfordatascience/tidytuesday/issues/382#issuecomment-1020305849).
 
-This has a total of two data sets, **ratings** and **details**. The ratings data set size is around 4.8MB, contains 21,631 observations and 10 columns. The details data set size is approximately 32.7MB, contains 21,831 observations and 23 columns.
-
-The [ratings](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv) data set contains information about the game, average rating , rank and theoretical rating average (bayes average). Every game's url and thumbnail link is also provided. It was collected over a time period of 100 AD to 2022.
+The [ratings](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv) dataset contains information about the game, average rating, rank and theoretical rating average (bayes average). Every game's url and thumbnail link is also provided. It was collected over a period of 100 AD to 2022. The data set size is around 4.8MB, contains 21,631 observations and 10 columns. The details data set size is approximately 32.7MB, contains 21,831 observations and 23 columns.
 
 |variable      |class     |description |
 |:-------------|:---------|:-----------|
@@ -74,7 +70,7 @@ The [ratings](https://raw.githubusercontent.com/rfordatascience/tidytuesday/mast
 |url           |character | Game url |
 |thumbnail     |character | Game thumbnail  |
 
-The [details](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv) data set provides information about the type of board game, game mechanics, who was the artist, creator and publisher of the game. It provides an extensive detail about the game such as min and max player who can play the game, minimum age, how the game is played and also put each game in categories such as building, dice, drinking e.t.c. The data collected is over a time period of 400 AD to 2023.
+The [details](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv) dataset provides information about the type of board game, game mechanics, who was the artist, creator, and publisher of the game. It provides an extensive detail about the game such as the minimum and maximum number of players who can play the game, minimum age, how the game is played and is categorised by the type of game such as building, dice, drinking etc. The data collected is over a period of 400 AD to 2023.
 
 |variable                |class     |description |
 |:-----------------------|:---------|:-----------|
@@ -102,6 +98,26 @@ The [details](https://raw.githubusercontent.com/rfordatascience/tidytuesday/mast
 |wanting                 |double    | Num wanting |
 |wishing                 |double    | Num wishing |
 
+# Data Wrangling
+
+* filter rows: There is *yearpublished* that is less than zero, so we have filtered this out by using the *filter* function.
+
+* creating variable: We have created a new variable *world_year* using *mutate* to indicate the major events that happened during that year.
+
+* join: Our data comes from two datasets, however some have the same variables, so we used the **inner_join** function to merge them for analysis.
+
+* separate rows: A board game may have multiple game mechanics, **separate_rows** function was used to split each game mechanic by comma and then calculated.
+
+* remove special characters: There are special symbols inside the strings, so **gsub** function was used to delete all the special symbols.
+
+* remove NA rows: Among the variables we select, some **NA** values affect our plotting results, so  **na.omit** function was used to delete NA rows.
+
+
+# Method used
+
+The methods used in this analysis are time series analysis, text wrangling, correlation analysis, and clustering. The time series analysis is used to look at how time changes have affected the data over time. Text wrangling is used to clean the data into a tidy format. Correlation analysis is used to look at the relationship between the variable of interest and lastly cluster analysis is used to look at how the observations are grouped together.
+
+
 ```{r}
 # Reading data
 ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
@@ -111,6 +127,53 @@ details <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/ti
 vis_dat(ratings)
 vis_dat(details)
 ```
+
+```{r}
+clean_details <- details %>% 
+  filter(yearpublished != 0) %>%
+  mutate(
+    world_year = case_when(
+      (yearpublished < 1914) ~ "1. Before First World War",
+      (yearpublished >= 1914) & (yearpublished <1919) ~ "2. During First World War",
+      (yearpublished >= 1919) & (yearpublished <1939) ~ "3. Before Second World War",
+      (yearpublished >= 1939) & (yearpublished <1946) ~ "4. During Second World War",
+      (yearpublished >= 1946) & (yearpublished <1965) ~ "5. Baby Boomer",
+      (yearpublished >= 1965) & (yearpublished <1983) ~ "6. Before Internet",
+      (yearpublished >= 1983) & (yearpublished <1993) ~ "7. Internet Born",
+      (yearpublished >= 1993) & (yearpublished <2008) ~ "8. Amazon, Google and Touchscreen Mobile Born",
+      (yearpublished >= 2008) & (yearpublished <2009) ~ "9. Global Financial Crisis",
+      (yearpublished >= 2009) & (yearpublished <2020) ~ "10. Post Global Financial Crisis",
+      (yearpublished >= 2020) & (yearpublished <2022) ~ "11. During COVID",
+      (yearpublished >= 2022) ~ "12. Post COVID"),
+    world_year = as.factor(world_year))
+
+levels(clean_details$world_year) = c("1. Before First World War",
+                          "2. During First World War",
+                          "3. Before Second World War",
+                          "4. During Second World War",
+                          "5. Baby Boomer",
+                          "6. Before Internet",
+                          "7. Internet Born",
+                          "8. Amazon, Google and Touchscreen Mobile Born",
+                          "9. Global Financial Crisis",
+                          "10. Post Global Financial Crisis",
+                          "11. During COVID",
+                          "12. Post COVID")
+
+clean_dat <- ratings %>%
+  inner_join(details,
+             by = "id") %>%
+  select(id, yearpublished, bayes_average, boardgamemechanic, playingtime) %>%
+  filter(yearpublished > 1990 & yearpublished < 2019) %>%
+  mutate(boardgamemechanic = gsub("[[]", "", boardgamemechanic),
+         boardgamemechanic = gsub("[]]", "", boardgamemechanic),
+         boardgamemechanic = gsub("'", "", boardgamemechanic),
+         boardgamemechanic = gsub('"', "", boardgamemechanic),
+         boardgamemechanic = gsub(" ", "", boardgamemechanic),
+         boardgamemechanic = str_trim(boardgamemechanic)) %>%
+  separate_rows(boardgamemechanic, sep = ",")
+```
+
 
 # Questions of interest
 
@@ -205,7 +268,7 @@ Q3. Given the number of games has been increasing, does this affect the game, e.
 Q4. Since the computer is more accessible, people are shifting to online games. How does this affect buyer behaviour?
 
 
-# Expected findings
+## Expected findings
 
 **Q1. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  Is this statement true and why is it the case?**
 
@@ -217,169 +280,172 @@ Studies have shown that games exploded in popularity when consumers tried to kee
 
 **Q3. Given the number of games has been increasing, does this affect the game, e.g., rating, mechanics, playing time?**
 
-For the playing time, I would expect as people have lesser leisure time, the game time should decrease to incorporate people's new lifestyles. For the rating, the average rating would be lower as there are more choice of games for people to play, which mean that there are more options for the people to compare the game. As for the game mechanics, people in different eras would have different preferred game types.
+As consumers have less leisure time, it is expected that the time limit for games would be adjusted and decreased to incorporate people's lifestyles. For the ratings, the average rating would be lower as there are more choices of games for people to play. This means that there are more options for consumers to compare games. As for game mechanics, consumers in different eras would have different preferred game types.
 
 **Q4. Since the computer is more accessible, people are shifting to online games. How does this affect buyer behaviour?**
 
-I would expect the number of people who owned board game to decrease around 2012 when a popular mobile game such as subway surfers, temple run was released. And in 2020, when COVID-19 hit, I expect the number of people who owned the game to decrease.
+It is expected that the number of people who owned board games would decrease circa 2012 when a popular mobile game such as subway surfers, temple run was released.  It is also expected that when COVID-19 hit in 2020, the number of people who owned games would decrease. 
 
 
 # Analysis and findings
 
+## Question 1
+
 **Q1. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  Are these statements true and why is it the case?**
 
-Pre-processing step:
-```{r}
-detailsv2=details %>% filter(yearpublished!=0)
+Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. 
 
-## create additional column that is based on world event (source: https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-since-1920/113604790/)
+```{r, include = FALSE}
+q1_details_1 <- clean_details %>%
+  select(id, yearpublished, owned, trading, wanting, wishing, world_year)
 
+q1_ratings_1 <- ratings %>%
+  select(id, bayes_average)
 
-detailsv2 = detailsv2 %>% mutate(world_year = case_when(
-  (yearpublished <1914)~ "1. Before First World War",
-  (yearpublished >= 1914) & (yearpublished <1919)~ "2. During First World War",
-  (yearpublished >= 1919) & (yearpublished <1939)~ "3. Before Second World War",
-  (yearpublished >= 1939) & (yearpublished <1946)~ "4. During Second World War",
-  (yearpublished >= 1946) & (yearpublished <1965)~ "5. Baby Boomer",
-  (yearpublished >= 1965) & (yearpublished <1983)~ "6. Before Internet",
-  (yearpublished >= 1983) & (yearpublished <1993)~ "7. Internet Born",
-  (yearpublished >= 1993) & (yearpublished <2008)~ "8. Amazon, Google and Touchscreen Mobile Born",
-  (yearpublished >= 2008) & (yearpublished <2009)~ "9. Global Financial Crisis",
-  (yearpublished >= 2009) & (yearpublished <2020)~ "10. Post Global Financial Crisis",
-  (yearpublished >= 2020) & (yearpublished <2022)~ "11. During COVID",
-  (yearpublished >= 2022) ~ "12. Post COVID",
-  
-))
+q1_dat_1 <- q1_details_1 %>%
+  inner_join(q1_ratings_1,
+             by = "id")
 
-detailsv2$world_year = as.factor(detailsv2$world_year)
-
-levels(detailsv2$world_year) =  c("1. Before First World War",
-                                     "2. During First World War",
-                                     "3. Before Second World War",
-                                     "4. During Second World War",
-                                     "5. Baby Boomer",
-                                     "6. Before Internet",
-                                     "7. Internet Born",
-                                     "8. Amazon, Google and Touchscreen Mobile Born",
-                                     "9. Global Financial Crisis",
-                                     "10. Post Global Financial Crisis",
-                                     "11. During COVID",
-                                     "12. Post COVID")
+summary(q1_dat_1)
 ```
 
+```{r num-game}
+q1_dat_1 %>%
+  group_by(world_year) %>%
+  tally() %>%
+  kable(caption = "Number of board game in each time period") %>%
+  kable_styling(full_width = FALSE)
+```
 
-```{r echo=FALSE}
-#### Part 1. Games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play. 
-
-d1 = detailsv2 %>% select(id, yearpublished, owned, trading, wanting, wishing, world_year)
-d2 = ratings %>% select(id, bayes_average)
-q1 = merge(d1, d2, by="id") ## joined data for analysis later
-
-
-summary(q1$yearpublished)
-q1 %>% group_by(world_year) %>% tally()
-
-q1 %>% 
+```{r ave-dist, fig.cap = "Distribution of the bayes average rating"}
+q1_dat_1 %>%
   filter((yearpublished>=1914) & (yearpublished <2023)) %>%
-ggplot( aes(bayes_average)) +
-  geom_histogram(alpha = 0.8)
+  ggplot(aes(x = bayes_average)) +
+  geom_histogram(alpha = 0.8) +
+  labs(x = "Bayes Average")
+```
 
-q1 %>% 
+```{r year-ave, fig.cap = "Yearly bayes average mean"}
+q1_dat_1 %>%
   group_by(yearpublished) %>%
-  
-  filter((yearpublished>=1914) & (yearpublished <2023)) %>%
-  
+  filter(yearpublished >= 1914 & yearpublished < 2023) %>%
   summarise(mean_bayes_average = mean(bayes_average)) %>%
-
-  ggplot(aes(x=yearpublished , y=mean_bayes_average)) + 
+  ggplot(aes(x = yearpublished , y = mean_bayes_average)) + 
   geom_point() + 
   geom_line() + 
   geom_smooth() +
-  labs(title = "Yearly mean_bayes_average",
-       y = "Yearly mean_bayes_average",
+  labs(y = "Bayes average mean",
        x = "Year") 
+```
 
+```{r want-wish, fig.cap = "Relationship between number of people who wanting and wishing the game"}
+q1_dat_1 %>%
+  ggplot(aes(x = wanting , y = wishing )) + 
+  geom_point() +
+  labs(x = "Number of people wanting the game", y = "Number of people wishing the game")
+```
 
-q1 %>%
-  ggplot(aes(x=wanting , y= wishing )) + 
-  geom_point() 
-
-
-q1 %>% # select(-bayes_average) %>% 
-  filter((yearpublished>=1914) & (yearpublished <2022)) %>%
+```{r percent-year, fig.caption = "Conditional proportion"}
+q1_dat_1 %>%
+  filter(yearpublished >= 1914 & yearpublished < 2022) %>%
   group_by(id) %>%
-  mutate( wanting_wishing = wanting + wishing,
-          rating = ifelse(bayes_average < mean(ratings$bayes_average), "Below Average", "Above Average")) %>%
-  select(-c("wishing", "wanting","bayes_average")) %>%
-  gather(key,value,-c(id,yearpublished,world_year,rating))%>%
-  arrange(id) %>%
- mutate(percent = prop.table(value)) %>%
-  ggplot(aes(x=yearpublished, y =percent)) + geom_jitter(alpha = 0.01) + 
-  geom_smooth() + facet_grid(key ~ rating) + theme_bw()
-
-
-q1 %>% # select(-bayes_average) %>% 
-  filter((yearpublished>=2000) & (yearpublished <2022)) %>%
-  group_by(id) %>%
-  mutate( wanting_wishing = wanting + wishing,
-          rating = ifelse(bayes_average < mean(ratings$bayes_average), "Below Average", "Above Average")) %>%
-  select(-c("wishing", "wanting","bayes_average")) %>%
-  gather(key,value,-c(id,yearpublished,world_year,rating))%>%
+  mutate(wanting_wishing = wanting + wishing,
+         rating = ifelse(bayes_average < mean(ratings$bayes_average), "Below Average", "Above Average")) %>%
+  select(-c("wishing", "wanting", "bayes_average")) %>%
+  gather(key, value, -c(id, yearpublished, world_year, rating)) %>%
   arrange(id) %>%
   mutate(percent = prop.table(value)) %>%
-  ggplot(aes(x=yearpublished, y =percent)) + geom_jitter(alpha = 0.01) + 
-  geom_smooth() + facet_grid(key ~ rating) + theme_bw()
+  ggplot(aes(x = yearpublished, y = percent)) +
+  geom_jitter(alpha = 0.01) +
+  geom_smooth() +
+  facet_grid(key ~ rating)
+```
 
+```{r percent-year2, fig.cap = "Conditional proportion in 2000s"}
+q1_dat_1 %>%
+  filter(yearpublished >= 2000 & yearpublished < 2022) %>%
+  group_by(id) %>%
+  mutate(wanting_wishing = wanting + wishing,
+         rating = ifelse(bayes_average < mean(ratings$bayes_average), "Below Average", "Above Average")) %>%
+  select(-c("wishing", "wanting", "bayes_average")) %>%
+  gather(key, value, -c(id, yearpublished, world_year, rating)) %>%
+  arrange(id) %>%
+  mutate(percent = prop.table(value)) %>%
+  ggplot(aes(x = yearpublished, y = percent)) +
+  geom_jitter(alpha = 0.01) +
+  geom_smooth() +
+  facet_grid(key ~ rating)
+```
 
+Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play. 
 
-##### Part2.  Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play.  
+```{r}
+q1_details_2 <- clean_details %>%
+  select(id, yearpublished, owned, trading, wanting, wishing, boardgameartist, boardgamedesigner)
 
+q1_ratings_2 <- ratings %>%
+  select(id, bayes_average, rank)
 
-d1 = detailsv2 %>% select(id, yearpublished, owned, trading, wanting, wishing, boardgameartist, boardgamedesigner)
-d2 = ratings %>% select(id, bayes_average,rank)
-q1 = merge(d1, d2, by="id") ## joined data for analysis later
-
-q2 = q1 %>%
+q1_dat_2 <- q1_details_2 %>%
+  inner_join(q1_ratings_2,
+             by = "id") %>%
   mutate(boardgameartist = stri_replace_all_regex(boardgameartist,
-                             pattern=c('\\[', '\\]', "\\'",'\\"', '\\\\'),
-                             replacement=c('', '', '','',''),
-                             vectorize=FALSE))
-q2$cnt<-unlist(lapply(str_split(q2$boardgameartist, ","), length))
+                                                  pattern = c('\\[', '\\]', "\\'",'\\"', '\\\\'),
+                                                  replacement = c('', '', '','',''),
+                                                  vectorize = FALSE))
 
-#  filter to select only those games that have single artist
-single_artist <- q2 %>% 
-  filter(cnt==1)
+q1_dat_2$cnt <- unlist(lapply(str_split(q1_dat_2$boardgameartist, ","), length))
+```
+
+Now we will only select those games that have single artist:
+
+```{r, include = FALSE}
+single_artist <- q1_dat_2 %>% 
+  filter(cnt == 1)
 
 glimpse(unique(single_artist$boardgameartist))
+```
 
-
-top_boardgameartist <-single_artist %>% 
-  filter((!is.na(boardgameartist) ), (boardgameartist != "(Uncredited)")) %>% 
+```{r top-artist}
+top_boardgameartist <- single_artist %>% 
+  filter(!is.na(boardgameartist),
+         boardgameartist != "(Uncredited)") %>% 
   group_by(boardgameartist) %>% 
   tally() %>% 
   top_n(70, n) %>% 
   arrange(desc(n))
 
-top_boardgameartist
+top_boardgameartist %>%
+  head(n = 10) %>%
+  kable(caption = "Number of board game made by each artist") %>%
+  kable_styling(full_width = FALSE)
+```
 
-games_df<- q2 %>% filter(boardgameartist %in% top_boardgameartist$boardgameartist)
-games_df2 = games_df %>% group_by(boardgameartist) %>%
-  summarise(mean_owned=mean(owned),
-            mean_bayes_average=mean(bayes_average )) 
-games_df2 %>%
-  ggplot(aes(x=mean_owned,y=mean_bayes_average,label=boardgameartist)) + geom_point() + geom_text() + theme_bw()
+```{r owned-ave, fig.cap = "Relationship between mean of Number of owned and mean of average rating"}
+games_df <- q1_dat_2 %>%
+  filter(boardgameartist %in% top_boardgameartist$boardgameartist) %>%
+  group_by(boardgameartist) %>%
+  summarise(mean_owned = mean(owned),
+            mean_bayes_average = mean(bayes_average))
 
+games_df %>%
+  ggplot(aes(x = mean_owned, y = mean_bayes_average, label = boardgameartist)) +
+  geom_point() +
+  geom_text() +
+  labs(x = "Mean of number of owned", y = "Mean of rating average")
+```
 
+```{r}
 set.seed(123)
-res.km <- kmeans(scale(games_df2[,-1]),3 , nstart = 25)
+res.km <- kmeans(scale(games_df[,-1]),3 , nstart = 25)
 # Dimension reduction using PCA
-res.pca <- prcomp(games_df2[, -1],  scale = TRUE)
+res.pca <- prcomp(games_df[, -1],  scale = TRUE)
 # Coordinates of individuals
 ind.coord <- as.data.frame(get_pca_ind(res.pca)$coord)
 # Add clusters obtained using the K-means algorithm
 ind.coord$cluster <- factor(res.km$cluster)
 # Add Species groups from the original data set
-ind.coord$boardgameartist <- games_df2$boardgameartist
+ind.coord$boardgameartist <- games_df$boardgameartist
 # Data inspection
 head(ind.coord)
 
@@ -387,83 +453,98 @@ head(ind.coord)
 eigenvalue <- round(get_eigenvalue(res.pca), 1)
 variance.percent <- eigenvalue$variance.percent
 head(eigenvalue)
+```
 
+```{r clus, fig.cap = "Cluster analysis"}
 ggscatter(
   ind.coord, x = "Dim.1", y = "Dim.2", 
   color = "cluster", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
   label = "boardgameartist", size = 1.5,  legend = "right", ggtheme = theme_bw(),
   xlab = paste0("Dim 1 (", variance.percent[1], "% )" ),
-  ylab = paste0("Dim 2 (", variance.percent[2], "% )" )
-) +
+  ylab = paste0("Dim 2 (", variance.percent[2], "% )" )) +
   stat_mean(aes(color = cluster), size = 4)
-
 ```
 
-# Pre-processing step
-- created an additional column that is based on world event (source: https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-since-1920/113604790/)
-- joined ratings and details together using 'id' as mapping key 
-- excluded years with limited data availability
+Due to the limited data availability, we will only be focusing from 1914 (start of World War I) to 2022.  By using the bayes average for the trend for rating \@ref(fig:year-ave), we can see that the fluctuation has decreased significantly. We can also see that \@ref(fig:want-wish) “wanting” and “wishing” are positively correlated. By combining “wanting” and “wishing” together \@ref(fig:percent-year), we would be able to have a representation of the games that are in demand. Ratings that are below average 5.68 based on bayes mean is considered as a low rating game.  Despite low ratings \@ref(fig:percent-year2), there is only a slight decrease in games that are owned in recent years, especially after Global Financial Crisis where it has reflected higher in demand. Games that were published earlier had slightly lower ratings however they were not in high demand. This means that our first statement where “games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play” is incorrect.
 
-Due to the limited data availability, we will only be focusing from 1914 (start of World War I) to 2022.  By using the bayes average for the trend for rating, we can see that the fluctuation has decreased significantly. We can also see that “wanting” and “wishing” are positively correlated. By combining “wanting” and “wishing” together, would we be able to have a representation of the games that are in demand. Ratings that are below average 5.68 based on bayes mean is considered as a low rating game.  Despite low ratings, there is only a slight decrease in games that are owned in recent years, especially after Global Financial Crisis where it has reflected higher in demand. Games that were published earlier had slightly lower ratings however they were not in high demand. This means that our first statement where “games developed in the earlier years are more in demand despite their low ratings, people still collect it rather than play” is incorrect.
-
-For this analysis, we will be focusing only the top 70 games with a single artist. Based on the plot for “average own” and “bayes average”, we can see that games from Chris Quilliams and Miguel Coimbra have high number of owned and ratings that are higher than 6. Interestingly, although the ratings for Cyril Bouquet is below 6, the games owned is more than 6000. This could indicate that the artwork is attractive, and people own it as a collection even though it might not be interesting to play. When doing clustering analysis, we also see that the artist can be grouped into 3 clusters. With the cluster 1 (red), being high quality artwork and can be kept as collection. This means that our second statement were “Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play” is true. 
+For this analysis, we will be focusing only the top 70 games with a single artist. Based on the plot \@ref(fig:owned-ave) for “average own” and “bayes average”, we can see that games from Chris Quilliams and Miguel Coimbra have high number of owned and ratings that are higher than 6. Interestingly, although the ratings for Cyril Bouquet is below 6, the games owned is more than 6000. This could indicate that the artwork is attractive, and people own it as a collection even though it might not be interesting to play. When doing clustering analysis \@ref(fig:clus), we also see that the artist can be grouped into 3 clusters. With the cluster 1 (red), being high quality artwork and can be kept as collection. This means that our second statement were “Game artworks may influence people’s wishes to own the game despite the game being uninteresting to play” is true. 
 
 
-**Q2.  The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games?**
+## Question 2
 
-```{r echo=FALSE}
+**Q2. The higher the ratios of people who wish to the own game and those who own the game could indicate the popularity of the game regardless of the minimum age, duration of the games, years publication and the game characteristics. Explore the factors that influence the ownership of the games?**
 
-d1 = detailsv2 %>% mutate( popularity=  (wanting+wishing) / owned )
-d2 = ratings %>% select(id, bayes_average)
-q1 = merge(d1, d2, by="id") ## joined data for analysis later
+```{r, include = FALSE}
+q2_details <- clean_details %>%
+  mutate(popularity = (wanting + wishing) / owned)
 
-summary(q1$popularity)
-q1 %>% filter(popularity > 1)
-q1 %>% 
-  ggplot(aes(x=bayes_average, y = popularity))+ geom_point() + facet_wrap(world_year~. )  
+q2_ratings <- ratings %>%
+  select(id, bayes_average)
 
+q2_dat <- q2_details %>%
+  inner_join(q2_ratings,
+             by = "id")
 
-q1 %>% 
+summary(q2_dat$popularity)
+
+q2_dat %>%
+  filter(popularity > 1)
+```
+
+```{r pop-ave, fig.cap = "Relationship between popularity and rating average for each time period"}
+q2_dat %>%
+  ggplot(aes(x = bayes_average, y = popularity)) +
+  geom_point() +
+  facet_wrap(world_year ~ .) +
+  labs(x = "Rating average", y = "Popularity")
+```
+
+```{r pop-ave-no2ww, fig.cap = "Relationship between popularity and rating average for each time period except the second world war"}
+q2_dat %>%
   filter(world_year != "4. During Second World War") %>%
-  ggplot(aes(x=bayes_average, y = popularity))+ geom_point() + facet_wrap(world_year~. )  
+  ggplot(aes(x = bayes_average, y = popularity)) +
+  geom_point() +
+  facet_wrap(world_year ~ .) +
+  labs(x = "Rating average", y = "Popularity")
+```
 
-
-
-  
-q2 = q1 %>%
+```{r}
+q2_dat_1 <- q2_dat %>%
   mutate(boardgamecategory = stri_replace_all_regex(boardgamecategory,
-                             pattern=c('\\[', '\\]', "\\'",'\\"', '\\\\'),
-                             replacement=c('', '', '','',''),
-                             vectorize=FALSE))
-q2$cnt<-unlist(lapply(str_split(q2$boardgamecategory, ","), length))
+                                                    pattern = c('\\[', '\\]', "\\'",'\\"', '\\\\'),
+                                                    replacement = c('', '', '','',''),
+                                                    vectorize = FALSE))
 
-single_cat<-q2 %>% 
+q2_dat_1$cnt <- unlist(lapply(str_split(q2_dat_1$boardgamecategory, ","), length))
+
+single_cat <- q2_dat_1 %>% 
   filter(cnt==1)
+```
 
-top_10 = single_cat  %>% 
-  filter(!is.na(boardgamecategory)) %>% 
-  group_by(boardgamecategory) %>% 
-  tally() %>% 
- top_n(10, n) 
+```{r}
+top_10 <- single_cat %>%
+  filter(!is.na(boardgamecategory)) %>%
+  group_by(boardgamecategory) %>%
+  tally() %>%
+  top_n(10, n)
+```
 
-q2 = single_cat %>% 
-  filter(boardgamecategory %in% top_10$boardgamecategory) 
-
-q2 %>% 
-  group_by(boardgamecategory,world_year) %>% 
-  tally() %>% 
- # top_n(30, n) %>% 
+```{r num-gamemech, fig.cap = "Number of game for each game mechanic in each time period"}
+q2_dat_1 %>%
+  filter(boardgamecategory %in% top_10$boardgamecategory) %>%
+  group_by(boardgamecategory, world_year) %>%
+  tally() %>%
   arrange(desc(n)) %>%
-  ggplot(aes(x= reorder(boardgamecategory, n), y=n)) + 
-  geom_bar(stat="identity", fill="#f68060", alpha=.6, width=.4) +
-    coord_flip() +
-    xlab("") +
-    theme_bw() +  facet_wrap(world_year~. ) 
+  ggplot(aes(x = reorder(boardgamecategory, n), y = n)) +
+  geom_bar(stat = "identity", fill = "#f68060", alpha = 0.6, width = 0.4) +
+  coord_flip() +
+  xlab("") +
+  facet_wrap(world_year ~ .)
+```
 
-
-
-q2 %>% 
-  filter(! world_year %in%   c("4. During Second World War", "5. Baby Boomer", "6. Before Internet", "5. Baby Boomer")) %>%
+```{r t-test, fig.cap = "T-test for popularity"}
+q2_dat_1 %>%
+  filter(! world_year %in% c("4. During Second World War", "5. Baby Boomer", "6. Before Internet", "5. Baby Boomer")) %>%
   group_by(world_year) %>% 
   summarize(t_test = list(t.test(popularity))) %>% 
   mutate(tidied = map(t_test, broom::tidy)) %>%
@@ -471,96 +552,225 @@ q2 %>%
   ggplot() + 
   geom_errorbarh(aes(xmin = conf.low,
                     xmax = conf.high,
-                    y = world_year))
+                    y = world_year)) +
+  labs(y = "Time period")
+```
 
-
-
-reg = q2 %>%
-  filter(! world_year %in%   c("4. During Second World War", "5. Baby Boomer", "6. Before Internet", "5. Baby Boomer")) %>%
+```{r}
+reg <- q2_dat_1 %>%
+  filter(! world_year %in% c("4. During Second World War", "5. Baby Boomer", "6. Before Internet", "5. Baby Boomer")) %>%
   group_by(world_year, boardgamecategory) %>%
-  nest() %>% 
-  mutate(
-    fit = map(data, ~ lm(popularity ~ trading+bayes_average+ minplayers + maxplayers + playingtime+ minplaytime + maxplaytime + minage , data = .x)),
-    tidied = map(fit, tidy),
-    glanced = map(fit, glance),
-    augmented = map(fit, augment)) %>%
-  mutate(
-    rsq = glanced %>% map_dbl("r.squared"),
-  ) 
+  nest() %>%
+  mutate(fit = map(data, ~ lm(popularity ~ trading + bayes_average + minplayers + maxplayers + playingtime + minplaytime + maxplaytime + minage , data = .x)),
+         tidied = map(fit, tidy),
+         glanced = map(fit, glance),
+         augmented = map(fit, augment),
+         rsq = glanced %>%
+           map_dbl("r.squared"))
+```
 
-
-
-
+```{r minage-pop, fig.cap = "Relationship between minimum age against popularity"}
 reg %>% 
   unnest(tidied) %>% 
-  select(world_year,boardgamecategory, term, estimate, rsq) %>% 
+  select(world_year, boardgamecategory, term, estimate, rsq) %>% 
   spread(term, estimate) %>% 
-  ggplot(aes(`(Intercept)`, minage)) +
+  ggplot(aes(x = `(Intercept)`, y = minage)) +
   geom_point(aes(colour = world_year, size = rsq)) +
   geom_smooth(se = FALSE) +
   scale_size_area() +
-  theme_minimal()
+  labs(x = "Intercept", y = "Minimum Age")
+```
 
-
-
+```{r playtime-pop, fig.cap = "Relationship between playing time against popularity"}
 reg %>% 
   unnest(tidied) %>% 
-  select(world_year,boardgamecategory, term, estimate, rsq) %>% 
+  select(world_year, boardgamecategory, term, estimate, rsq) %>% 
   spread(term, estimate) %>% 
-  ggplot(aes(`(Intercept)`, playingtime)) +
+  ggplot(aes(x = `(Intercept)`, y = playingtime)) +
   geom_point(aes(colour = world_year, size = rsq)) +
   geom_smooth(se = FALSE) +
   scale_size_area() +
-  theme_minimal()
+  labs(x = "Intercept", y = "Playing Time")
+```
 
-
-
+```{r maxplay-pop, fig.cap = "Relationship between maximum players against popularity"}
 reg %>% 
   unnest(tidied) %>% 
-  select(world_year,boardgamecategory, term, estimate, rsq) %>% 
+  select(world_year, boardgamecategory, term, estimate, rsq) %>% 
   spread(term, estimate) %>% 
-  ggplot(aes(`(Intercept)`, maxplayers)) +
+  ggplot(aes(x = `(Intercept)`, y = maxplayers)) +
   geom_point(aes(colour = world_year, size = rsq)) +
   geom_smooth(se = FALSE) +
   scale_size_area() +
-  theme_minimal()
+  labs(x = "Intercept", y = "Maximum Players")
+```
 
-
-
-
-
-## residual
+```{r res, fig.cap = "Residuals plot"}
 reg %>% 
   unnest(augmented) %>% 
-  ggplot(aes(bayes_average, .resid)) +
+  ggplot(aes(x = bayes_average, y = .resid)) +
   geom_line(aes(group = boardgamecategory), alpha = 0.3) +
   geom_hline(yintercept = 0, colour = "red", size = 1) +
   geom_smooth(se = FALSE, size = 1.5) +
   facet_wrap( ~ world_year) +
-  theme_minimal()
-
-
-
-
-
+  labs(x = "Average Rating")
 ```
 
-For this analysis, we have defined popularity by summing the “wanting” and “wishing” and then dividing it by the “owned” to get an indication of the board game popularity. Games during World War II is excluded in our analysis as they are outliers. Based on our observation, interestingly during World War I, before World War II and during Covid-19, board games have gained popularity. Limit to single category game type, card game and abstract strategy are the top two most popular game categories. Intriguingly, during the global financial crisis and post-global financial crisis, abstract strategy type game is more popular compared to the card game, even though card game is usually the most popular regardless of the period.  
+For this analysis, we have defined popularity by summing the “wanting” and “wishing” and then dividing it by the “owned” to get an indication of the board game popularity. Games during World War II is excluded in our analysis as they are outliers. Based on \@ref(fig:pop-ave), interestingly during World War I, before World War II and during Covid-19, board games have gained popularity. Limit to single category game type \@ref(fig:num-gamemech), card game and abstract strategy are the top two most popular game categories. Intriguingly, during the global financial crisis and post-global financial crisis, abstract strategy type game is more popular compared to the card game, even though card game is usually the most popular regardless of the period.  
 
 Due to the limited data in certain periods, we have removed games published in periods during World War II, Baby Boomer and Before the Internet when performing a one-sided t-test to understand if the popularity is statistically significant. The result showed that all periods are significant, except the period when the Internet was born.
 
-Multiple linear regressions were fitted to the data for different periods. Based on the residuals, the models did not fit well with the games published during World War I, before World War II and during Covid-19. This suggests that when the world is not at peace, the board game's popularity could fluctuate a lot. “Playing time” and “maxplayers” both seem to be important factors that have contributed to the game’s popularity in recent few years (i.e. Post Covid-19). In contrast, “minage” does not seem to be relevant to popularity.
+Multiple linear regressions were fitted to the data for different periods. Based on the residuals \@ref(fig:res), the models did not fit well with the games published during World War I, before World War II and during Covid-19. This suggests that when the world is not at peace, the board game's popularity could fluctuate a lot. “Playing time” \@ref(fig:playtime-pop) and “maxplayers” \@ref(fig:maxplay-pop) both seem to be important factors that have contributed to the game’s popularity in recent few years (i.e. Post Covid-19). In contrast, “minage” \@ref(fig:minage-pop) does not seem to be relevant to popularity.
+
+
+## Question 3
+
+**Q3. Given the number of games has been increasing, does this affect the game, e.g., rating, mechanics, playing time?**
+
+We would like to only look at post COVID-19 data. The reason for this is that the lock down could impact the number of game created.
+
+```{r numgame-year, fig.cap = "Number of games over time"}
+details %>%
+  select(id, yearpublished) %>%
+  filter(yearpublished > 1900 & yearpublished < 2019) %>%
+  group_by(yearpublished) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(x = yearpublished, y = n)) +
+  geom_line(color = "#609c6c") +
+  labs(x = "Year", y = "Number of board games")
+```
+
+```{r year-ave-2, fig.cap = "Average rating over time"}
+p1 <- clean_dat %>%
+  select(id, yearpublished, bayes_average) %>%
+  group_by(yearpublished) %>%
+  ggplot(aes(x = yearpublished, y = bayes_average)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Year", y = "Average rating")
+
+ggplotly(p1)
+```
+
+```{r mech-time, fig.cap = "Most Prevalent Mechanics in the 1990s and 2010s"}
+p2 <- clean_dat %>%
+  select(id, yearpublished, boardgamemechanic) %>%
+  filter(yearpublished %in% c(1990:2000, 2010:2019)) %>%
+  mutate(year = ifelse(yearpublished <= 2000, "1990s", "2010s")) %>%
+  group_by(year, boardgamemechanic) %>%
+  summarise(count = n()) %>%
+  top_n(20L) %>%
+  spread(key = year, value = count) %>%
+  na.omit() %>%
+  ggplot() +
+  geom_point(aes(x = `1990s`,
+                 y = reorder(boardgamemechanic, `2010s`)), 
+             color = "#Aa3428") +
+  geom_point(aes(x = `2010s`,
+                 y = boardgamemechanic), 
+             color = "#609c6c",
+             size = 3) +
+  geom_segment(aes(x = `1990s`, 
+                   xend = `2010s`,
+                   y = boardgamemechanic, 
+                   yend = boardgamemechanic)) +
+  labs(x = "Number of game",
+       y = "Mechanics")
+
+ggplotly(p2)
+```
+
+```{r play-year, fig.cap = "Game playing time over time"}
+p3 <- clean_dat %>%
+  select(id, yearpublished, playingtime) %>%
+  mutate(playingtime = log(playingtime)) %>%
+  ggplot(aes(x = yearpublished, y = playingtime)) + 
+  geom_point() +
+  geom_smooth() +
+  labs(x = "Year", y = "Playing time")
+
+ggplotly(p3)
+```
+
+From the figure \@ref(fig:year-ave-2), we can see that the average rating seems to be higher than before, which is different from the expected findings. This could be due to better development of board games in today's market, where there are more innovative creations of board games. 
+
+According to the figure \@ref(fig:mech-time), we can find that the most common game mechanic in both 1990s and 2010s is *Dice Rolling. **Dice Rolling* itself is a mechanic that can be used in many games. It has been around for a long time, and in ancient times, dices were made of stones, clay, bones, etc. to play the game, so *Dice Rolling* is often seen as the most dominant symbol of board games (Sofiia & Joseph Alexander, 2017). In the figure \@ref(fig:play-year), to reduce the skewness of the original data, the log transformation was used. Based on the observation, there is no relationship between the playing time and the yearpublished this concludes that the playing time neither decreases nor increases. This is perhaps because, the board game designer thinks the playing time is already optimal does not need to be changed.
+
+
+## Question 4
+
+**Q4. Since the computer is more accessible, people are shifting to online games. How does this affect buyer behaviour?**
+
+```{r}
+q4_dat <- ratings %>%
+  inner_join(details,
+             by = "id") %>%
+  select(id, name, yearpublished, trading, wanting, owned, wishing) %>%
+  filter(yearpublished >= 1990 & yearpublished < 2022)
+```
+
+```{r buyer, fig.cap = "The buyer behaviour over time"}
+options(scipen = 999)
+
+tr <- q4_dat %>%
+  select(yearpublished, trading) %>%
+  group_by(yearpublished) %>%
+  summarise(num_of_people = sum(trading)) %>%
+  ggplot(aes(x = yearpublished, y = num_of_people)) +
+  geom_rect(aes(xmin = 2020, xmax = 2021, ymin = 0, ymax = 65000), fill = "grey50") +
+  geom_line() +
+  geom_vline(xintercept = 2015, color = "red") +
+  labs(x = "Year", y = "Number of people trading") +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
+
+wa <- q4_dat %>%
+  select(yearpublished, wanting) %>%
+  group_by(yearpublished) %>%
+  summarise(num_of_people = sum(wanting)) %>%
+  ggplot(aes(x = yearpublished, y = num_of_people)) +
+  geom_rect(aes(xmin = 2020, xmax = 2021, ymin = 0, ymax = 70000), fill = "grey50") +
+  geom_line() +
+  geom_vline(xintercept = 2017, color = "red") +
+  labs(x = "Year", y = "Number of people wanting") +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
+
+ow <- q4_dat %>%
+  select(yearpublished, owned) %>%
+  group_by(yearpublished) %>%
+  summarise(num_of_people = sum(owned)) %>%
+  ggplot(aes(x = yearpublished, y = num_of_people)) +
+  geom_rect(aes(xmin = 2020, xmax = 2021, ymin = 0, ymax = 2500000), fill = "grey50") +
+  geom_line() +
+  geom_vline(xintercept = 2015, color = "red") +
+  labs(x = "Year", y = "Number of people owned") +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
+
+wi <- q4_dat %>%
+  select(yearpublished, wishing) %>%
+  group_by(yearpublished) %>%
+  summarise(num_of_people = sum(wishing)) %>%
+  ggplot(aes(x = yearpublished, y = num_of_people)) +
+  geom_rect(aes(xmin = 2020, xmax = 2021, ymin = 0, ymax = 500000), fill = "grey50") +
+  geom_line() +
+  geom_vline(xintercept = 2017, color = "red") +
+  labs(x = "Year", y = "Number of people wishing") +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
+
+(tr + wa)/(ow + wi)
+```
+
+From the figure \@ref(fig:buyer), we can see that number of people “trading” and “owning” the game has decreased since 2015, while the number of people “wishing” and “wanting” has decreased after 2017. Board games were still in demand despite online games being introduced although it was expected that the downfall of board games would happen earlier given the rapid advancement in technology. The increasing trend before the peak is likely due to the rise of the internet, which allowed people to discover new board games ("Why Board Games Are So Popular", 2019).  The steep drop after 2020 may have been a result of the impact of COVID-19, where lockdown affected supply chain systems, which reduced the number of games that can be shipped.
 
 
 ## Data limitations:
 
 * Missing information, so we needed to remove it.
 * Insufficient data so we removed it to avoid misleading information.
-
-
-
-
-
+* This data only contains only physical copied of the board game.
 
 
 # Conclusion
@@ -569,48 +779,78 @@ Multiple linear regressions were fitted to the data for different periods. Based
 
 # References
 
-Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based Publication Ready Plots. R package version 0.4.0. https://CRAN.R-project.org/package=ggpubr
+Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based Publication Ready Plots. R package version 0.4.0.
+  https://CRAN.R-project.org/package=ggpubr
 
-Alboukadel Kassambara and Fabian Mundt (2020). factoextra: Extract and Visualize the Results of Multivariate Data Analyses. R package version 1.0.7. https://CRAN.R-project.org/package=factoextra
+Alboukadel Kassambara and Fabian Mundt (2020). factoextra: Extract and Visualize the Results of Multivariate Data
+  Analyses. R package version 1.0.7. https://CRAN.R-project.org/package=factoextra
 
-Barone, R. (2022). Video games are fun. Here's why, and how they hook us. https://www.idtech.com/blog/what-makes-video-games-fun#:~:text=Why%20are%20video%20games%20fun,to%20their%20attention%20to%20detail.
+Barone, R. (2022). Video games are fun. Here's why, and how they hook us.
+  https://www.idtech.com/blog/what-makes-video-games-fun#:~:text=Why%20are%20video%20games%20fun,to%20their%20attent   ion%20to%20detail.
 
-Brambilla Hall, S. (2022). COVID-19 is taking gaming and esports to the next level. World Economic Forum. https://www.weforum.org/agenda/2020/05/covid-19-taking-gaming-and-esports-next-level/.
+Brambilla Hall, S. (2022). COVID-19 is taking gaming and esports to the next level. World Economic Forum.
+  https://www.weforum.org/agenda/2020/05/covid-19-taking-gaming-and-esports-next-level/.
+  
+C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC
+  Florida, 2020.
 
-David Robinson, Alex Hayes and Simon Couch (2022). broom: Convert Statistical Objects into Tidy Tibbles. R package version 0.7.12. https://CRAN.R-project.org/package=broom
+David Robinson, Alex Hayes and Simon Couch (2022). broom: Convert Statistical Objects into Tidy Tibbles. R package
+  version 0.7.12. https://CRAN.R-project.org/package=broom
 
-Epstein, A. (2022). Game on: How COVID-19 became the perfect match for gamers. World Economic Forum. https://www.weforum.org/agenda/2020/09/covid19-coronavirus-pandemic-video-games-entertainment-media/.
+Epstein, A. (2022). Game on: How COVID-19 became the perfect match for gamers. World Economic Forum.
+  https://www.weforum.org/agenda/2020/09/covid19-coronavirus-pandemic-video-games-entertainment-media/.
 
-Gagolewski M (2021). _stringi: Fast and portable character string processing in R_. R package version 1.7.6, <URL: https://stringi.gagolewski.com/>.
+Gagolewski M (2021). _stringi: Fast and portable character string processing in R_. R package version 1.7.6, <URL:
+  https://stringi.gagolewski.com/>.
 
-Gagolewski M (2021). “stringi: Fast and portable character string processing in R.” _Journal of Statistical Software_. to appear.
+Gagolewski M (2021). “stringi: Fast and portable character string processing in R.” _Journal of Statistical
+  Software_. to appear.
 
 H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
 
-Hadley Wickham (2019). stringr: Simple, Consistent Wrappers for Common String Operations. R package version 1.4.0. https://CRAN.R-project.org/package=stringr
+Kassambara A, Mundt F (2020). _factoextra: Extract and Visualize the Results of Multivariate Data
+  Analyses_. R package version 1.0.7, <https://CRAN.R-project.org/package=factoextra>.
 
-Hadley Wickham and Maximilian Girlich (2022). tidyr: Tidy Messy Data. R package version 1.2.0. https://CRAN.R-project.org/package=tidyr
+OppenheimerFunds (2018). Investing in the Soaring Popularity of Gaming.
+  https://www.reuters.com/article/sponsored/popularity-of-gaming.
 
-Hadley Wickham, Romain François, Lionel Henry and Kirill Müller (2022). dplyr: A Grammar of Data Manipulation. R package version 1.0.8. https://CRAN.R-project.org/package=dplyr
-https://www.weforum.org/agenda/2022/07/gaming-pandemic-lockdowns-pwc-growth/#:~:text=The%20video%20game%20sector%20is,exceed%20%24320%20billion%20by%202026.
-https://zellerhausart.com/blog/how-artwork-influences-purchase-decisions.
+Pedersen T (2022). _patchwork: The Composer of Plots_. R package version 1.1.2,
+  <https://CRAN.R-project.org/package=patchwork>.
 
-Kirill Müller and Hadley Wickham (2021). tibble: Simple Data Frames. R package version 3.1.6. https://CRAN.R-project.org/package=tibble
-
-Lionel Henry and Hadley Wickham (2020). purrr: Functional Programming Tools. R package version 0.3.4. https://CRAN.R-project.org/package=purrr
-
-OppenheimerFunds (2018). Investing in the Soaring Popularity of Gaming. https://www.reuters.com/article/sponsored/popularity-of-gaming.
-
-Prystupa-Rządca, K., & Starostka, J. (2022). Customer Involvement in the Game Development Process. https://jemi.edu.pl/vol-11-issue-3-2015/customer-involvement-in-the-game-development-process.
+Prystupa-Rządca, K., & Starostka, J. (2022). Customer Involvement in the Game Development Process.
+  https://jemi.edu.pl/vol-11-issue-3-2015/customer-involvement-in-the-game-development-process.
 
 Read, S. (2022). Gaming is booming and is expected to keep growing.
 
-Young, A., & Harrington, J. (2022). World history: These are among the most important global events to happen annually since 1920. https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-since-1920/113604790/
+Tierney N (2017). “visdat: Visualising Whole Data Frames.” _JOSS_, *2*(16), 355. doi:10.21105/joss.00355
+  <https://doi.org/10.21105/joss.00355>, <http://dx.doi.org/10.21105/joss.00355>.
+
+Why Board Games Are So Popular. (2019, January 19). Retrieved from My Kind of Meeple website:
+  https://mykindofmeeple.com/why-are-board-games-popular/
+
+Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A, Henry L, Hester J,
+  Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J, Robinson D, Seidel DP, Spinu V, Takahashi K,
+  Vaughan D, Wilke C, Woo K, Yutani H (2019). “Welcome to the tidyverse.” _Journal of Open Source
+  Software_, *4*(43), 1686. doi:10.21105/joss.01686 <https://doi.org/10.21105/joss.01686>.
+
+Yihui Xie (2022). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version
+  1.39.
+
+Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd edition. Chapman and Hall/CRC. ISBN
+  978-1498716963
+
+Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible Research in R. In Victoria Stodden,
+  Friedrich Leisch and Roger D. Peng, editors, Implementing Reproducible Computational Research. Chapman
+  and Hall/CRC. ISBN 978-1466561595
+
+Young, A., & Harrington, J. (2022). World history: These are among the most important global events to happen
+  annually since 1920. https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-si
+  nce-1920/113604790/
 
 Zeller, P. (2022). How Artwork Influences Purchase Decisions.
 
-
-
+Zhu H (2021). _kableExtra: Construct Complex Table with 'kable' and Pipe Syntax_. R package version
+  1.3.4, <https://CRAN.R-project.org/package=kableExtra>.
 
 
 
