@@ -732,41 +732,53 @@ With our data exploration, we can see that low rating games were not in demand i
 
 # References
 
-Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based Publication Ready Plots. R package version 0.4.0. <https://CRAN.R-project.org/package=ggpubr>
+Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based Publication Ready Plots. R package version 0.4.0. https://CRAN.R-project.org/package=ggpubr
 
-Alboukadel Kassambara and Fabian Mundt (2020). factoextra: Extract and Visualize the Results of Multivariate Data Analyses. R package version 1.0.7. <https://CRAN.R-project.org/package=factoextra>
+Alboukadel Kassambara and Fabian Mundt (2020). factoextra: Extract and Visualize the Results of Multivariate Data Analyses. R package version 1.0.7. https://CRAN.R-project.org/package=factoextra
 
-Barone, R. (2022). Video games are fun. Here's why, and how they hook us. <https://www.idtech.com/blog/what-makes-video-games-fun#>:\~:text=Why%20are%20video%20games%20fun,to%20their%20attent ion%20to%20detail.
+Barone, R. (2022). Video games are fun. Here's why, and how they hook us. https://www.idtech.com/blog/what-makes-video-games-fun#:~:text=Why%20are%20video%20games%20fun,to%20their%20attention%20to%20detail.
 
-Brambilla Hall, S. (2022). COVID-19 is taking gaming and esports to the next level. World Economic Forum. <https://www.weforum.org/agenda/2020/05/covid-19-taking-gaming-and-esports-next-level/>.
+Brambilla Hall, S. (2022). COVID-19 is taking gaming and esports to the next level. World Economic Forum. https://www.weforum.org/agenda/2020/05/covid-19-taking-gaming-and-esports-next-level/.
 
 C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC Florida, 2020.
 
-David Robinson, Alex Hayes and Simon Couch (2022). broom: Convert Statistical Objects into Tidy Tibbles. R package version 0.7.12. <https://CRAN.R-project.org/package=broom>
+David Robinson, Alex Hayes and Simon Couch (2022). broom: Convert Statistical Objects into Tidy Tibbles. R package version 0.7.12. https://CRAN.R-project.org/package=broom
 
-Epstein, A. (2022). Game on: How COVID-19 became the perfect match for gamers. World Economic Forum. <https://www.weforum.org/agenda/2020/09/covid19-coronavirus-pandemic-video-games-entertainment-media/>.
+Epstein, A. (2022). Game on: How COVID-19 became the perfect match for gamers. World Economic Forum. https://www.weforum.org/agenda/2020/09/covid19-coronavirus-pandemic-video-games-entertainment-media/.
 
-Gagolewski M (2021). *stringi: Fast and portable character string processing in R*. R package version 1.7.6, \<URL: <https://stringi.gagolewski.com/>\>.
+Gagolewski M (2021). _stringi: Fast and portable character string processing in R_. R package version 1.7.6, <URL: https://stringi.gagolewski.com/>.
 
-Gagolewski M (2021). "stringi: Fast and portable character string processing in R." *Journal of Statistical Software*. to appear.
+Gagolewski M (2021). “stringi: Fast and portable character string processing in R.” _Journal of Statistical Software_. to appear.
 
 H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
 
-Kassambara A, Mundt F (2020). *factoextra: Extract and Visualize the Results of Multivariate Data Analyses*. R package version 1.0.7, <https://CRAN.R-project.org/package=factoextra>.
+Hadley Wickham (2019). stringr: Simple, Consistent Wrappers for Common String Operations. R package version 1.4.0. https://CRAN.R-project.org/package=stringr
 
-OppenheimerFunds (2018). Investing in the Soaring Popularity of Gaming. <https://www.reuters.com/article/sponsored/popularity-of-gaming>.
+Hadley Wickham and Maximilian Girlich (2022). tidyr: Tidy Messy Data. R package version 1.2.0. https://CRAN.R-project.org/package=tidyr
 
-Pedersen T (2022). *patchwork: The Composer of Plots*. R package version 1.1.2, <https://CRAN.R-project.org/package=patchwork>.
+Hadley Wickham, Romain François, Lionel Henry and Kirill Müller (2022). dplyr: A Grammar of Data Manipulation. R package version 1.0.8. https://CRAN.R-project.org/package=dplyr
+https://www.weforum.org/agenda/2022/07/gaming-pandemic-lockdowns-pwc-growth/#:~:text=The%20video%20game%20sector%20is,exceed%20%24320%20billion%20by%202026.
+https://zellerhausart.com/blog/how-artwork-influences-purchase-decisions.
 
-Prystupa-Rządca, K., & Starostka, J. (2022). Customer Involvement in the Game Development Process. <https://jemi.edu.pl/vol-11-issue-3-2015/customer-involvement-in-the-game-development-process>.
+Kassambara A, Mundt F (2020). factoextra: Extract and Visualize the Results of Multivariate Data Analyses. R package version 1.0.7, https://CRAN.R-project.org/package=factoextra.
+
+Kirill Müller and Hadley Wickham (2021). tibble: Simple Data Frames. R package version 3.1.6. https://CRAN.R-project.org/package=tibble
+
+Lionel Henry and Hadley Wickham (2020). purrr: Functional Programming Tools. R package version 0.3.4. https://CRAN.R-project.org/package=purrr
+
+OppenheimerFunds (2018). Investing in the Soaring Popularity of Gaming. https://www.reuters.com/article/sponsored/popularity-of-gaming.
+
+Pedersen T (2022). patchwork: The Composer of Plots. R package version 1.1.2, https://CRAN.R-project.org/package=patchwork.
+
+Prystupa-Rządca, K., & Starostka, J. (2022). Customer Involvement in the Game Development Process. https://jemi.edu.pl/vol-11-issue-3-2015/customer-involvement-in-the-game-development-process.
 
 Read, S. (2022). Gaming is booming and is expected to keep growing.
 
-Sargeantson, E (2022). Why Board Games Are So Popular.<https://mykindofmeeple.com/why-are-board-games-popular/>
+Sargeantson, E (2022). Why Board Games Are So Popular. https://mykindofmeeple.com/why-are-board-games-popular/
 
-Tierney N (2017). "visdat: Visualising Whole Data Frames." *JOSS*, *2*(16), 355. <doi:10.21105/joss.00355> <https://doi.org/10.21105/joss.00355>, <http://dx.doi.org/10.21105/joss.00355>.
+Tierney N (2017). “visdat: Visualising Whole Data Frames.” JOSS, 2(16), 355. doi:10.21105/joss.00355https://doi.org/10.21105/joss.00355, http://dx.doi.org/10.21105/joss.00355.
 
-Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A, Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J, Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H (2019). "Welcome to the tidyverse." *Journal of Open Source Software*, *4*(43), 1686. <doi:10.21105/joss.01686> <https://doi.org/10.21105/joss.01686>.
+Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A, Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J, Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H (2019). “Welcome to the tidyverse.” Journal of Open Source Software, 4(43), 1686. doi:10.21105/joss.01686https://doi.org/10.21105/joss.01686.
 
 Yihui Xie (2022). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.39.
 
@@ -774,8 +786,8 @@ Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd edition. Chapman and Ha
 
 Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible Research in R. In Victoria Stodden, Friedrich Leisch and Roger D. Peng, editors, Implementing Reproducible Computational Research. Chapman and Hall/CRC. ISBN 978-1466561595
 
-Young, A., & Harrington, J. (2022). World history: These are among the most important global events to happen annually since 1920. <https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-si> nce-1920/113604790/
+Young, A., & Harrington, J. (2022). World history: These are among the most important global events to happen annually since 1920. https://www.usatoday.com/story/money/2020/09/06/the-worlds-most-important-event-every-year-si nce-1920/113604790/
 
 Zeller, P. (2022). How Artwork Influences Purchase Decisions.
 
-Zhu H (2021). *kableExtra: Construct Complex Table with 'kable' and Pipe Syntax*. R package version 1.3.4, <https://CRAN.R-project.org/package=kableExtra>.
+Zhu H (2021). kableExtra: Construct Complex Table with ‘kable’ and Pipe Syntax. R package version 1.3.4, https://CRAN.R-project.org/package=kableExtra.
