@@ -9,7 +9,8 @@ author:
   - [Alison Phan]
 date: "`r Sys.Date()`"
 output: 
-  bookdown::html_document2: default
+  bookdown::html_document2:
+    theme: cerulean
 keep_md: true
 ---
 
@@ -732,7 +733,7 @@ From the figure \@ref(fig:buyer), we can see that number of people "trading" and
 
 # Conclusion
 
-With our data exploration, we can see that low rating games were not in demand in early years. However, game artworks play a role in influencing buyers to make a purchase. Gaming companies are likely to make good profit during periods where people are bored and want an escape from their surroundings especially during periods where they are in isolation such as lockdowns during COVID-19. Since there is no relationship between the playing time and the year published, there is no need for game developers to focus on changing time limits for games to adjust to people’s lifestyles. Game developers should focus on inventing new innovative creations of board games to maximize their sales and profitability. Gaming companies should take note on the difficulties of shipping their games during periods such as COVID-19 and come up with back up plans to avoid losing potential sales.
+With our data exploration, we can see that low rating games were not in demand in early years. However, game artworks play a role in influencing buyers to make a purchase. Gaming companies are likely to make good profit during periods where people are bored and want an escape from their surroundings especially during periods where they are in isolation such as lock downs during COVID-19. Since there is no relationship between the playing time and the year published, there is no need for game developers to focus on changing time limits for games to adjust to people’s lifestyles. Game developers should focus on inventing new innovative creations of board games to maximize their sales and profitability. Gaming companies should take note on the difficulties of shipping their games during periods such as COVID-19 and come up with back up plans to avoid losing potential sales.
 
 
 # References
